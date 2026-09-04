@@ -24,6 +24,21 @@ separate lifecycle ledger.
 6. Present the exact forge and CI state for human review. Invoke `sociuu-ship`
    only after an explicit shipping request.
 
+## Foreground autonomy
+
+Within the confirmed task scope, act as an accountable developer rather than a
+step-by-step assistant. Continue through ordinary implementation, test, review,
+environment, and QA decisions without asking for routine confirmation. Select
+relevant tests, investigate failures, make small necessary repairs, reuse or
+prepare a task-bound environment, and re-run affected proof when the evidence
+shows it is needed.
+
+Stop and request direction only for a material scope or product decision,
+protected or destructive action, Production access, credentials or external
+provider work, a dependency/lockfile change, an unverifiable result, or a
+genuine conflict in authority. Report the evidence and the narrow decision
+needed; do not turn ordinary engineering judgement into a handoff.
+
 ## Provider profiles
 
 Use the same lifecycle on Codex, ChatGPT, and Claude. Adapt only invocation
