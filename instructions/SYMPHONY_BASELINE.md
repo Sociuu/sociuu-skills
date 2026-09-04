@@ -12,6 +12,15 @@ without asking for routine confirmation. Select relevant tests, investigate
 failures, make small necessary repairs, prepare or reuse task-bound local
 environments, and rerun affected proof when evidence requires it.
 
+## Activation signal
+
+At the first user-facing response for a substantive Sociuu implementation task,
+emit exactly: `Sociuu Symphony active — autonomous delivery within confirmed scope.`
+Do this once per task. Do not emit it for read-only, planning, status-only, or
+ordinary question-only work. The signal confirms that the operating policy is
+active; it does not claim that testing, QA, readiness, merge, or deployment has
+passed.
+
 Use the available specialist skill or tool that owns the next action. Compound
 Engineering remains the default code-work and Dogfood system; Dock owns runtime
 lifecycle; Apex Scaffolding owns synthetic data; product repositories own code
