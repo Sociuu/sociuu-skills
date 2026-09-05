@@ -1,8 +1,11 @@
 # Task documents
 
-Use one Doc with Ledger and QA Runbook pages or existing equivalent task-linked
-documents. Preserve established document identities. Scale length to task risk;
-headings are prompts, not reasons to manufacture content.
+Use existing task-linked Ledger and QA Runbook records or attach Markdown files
+when records are missing. Do not create or require ClickUp Docs. Preserve existing
+artifacts, including already-used Docs; no migration or deletion is required.
+The main task description's **Links & artefacts** section identifies the current
+records and distinguishes superseded attachment versions. Scale length to task
+risk; headings are prompts, not reasons to manufacture content.
 
 ## Ledger
 

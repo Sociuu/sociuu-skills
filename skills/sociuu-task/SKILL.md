@@ -24,31 +24,34 @@ Use explicit task routing first. Otherwise apply these Sociuu defaults in order:
 Resolve uncertainty from scope and current list metadata; ask only if it remains
 materially ambiguous. Query actual statuses and fields rather than guessing IDs.
 
-Find the task's existing Ledger and QA Runbook. Create missing documents using
+Find the task's existing Ledger and QA Runbook through its description and attachments. Create missing records using
 [task-documents.md](references/task-documents.md). They are canonical in ClickUp
 for every implementation, bug, maintenance or infrastructure task. A QA Runbook
 always exists, including explicit QA-not-applicable rationale and substitute
 verification. Do not create an independent task ledger per repository.
 
-Associate documents with the task through native Doc/task links. If task-parent
-Doc creation is unsupported, create in the task's list and associate the Doc
-through the supported relationship UI/API. A description/comment URL is only
-a navigation aid, not a substitute for the requested native association.
-Discover configured link fields/attachments for MRs, Figma and artifacts.
-Do not invent relationship endpoints or claim an unsupported write succeeded.
-Keep unresolved association work visible while continuing independent work.
+Maintain a clearly named **Links & artefacts** section in the main task description.
+Include every participating MR, Figma/Figma Make reference, Ledger, QA Runbook,
+and relevant ADR, context or other artifact. Preserve the rest of the description
+and verify each link identifies the intended resource. Do not invent missing assets.
+
+Task attachments are acceptable for Ledger and QA Runbook records. Identify the
+current version and distinguish superseded versions; preserve existing artifacts.
+Do not introduce or require ClickUp Docs. Existing Docs may remain linked without
+migration. Native Add links/sidebar associations are optional conveniences, never
+completion gates; do not require Computer Use to maintain them.
 
 ## Maintain
 
 Update at scope changes, meaningful implementation milestones, review, QA and
 handoff. Keep status truthful; a published MR is not a staging release.
-Read current content immediately before each update, preserve others' sections,
+Read current task and record content immediately before each update, preserve others' sections,
 and refetch after writing. If another contributor changes an overlapping section,
 reconcile or ask that owner; never replace it from a stale local copy.
 Use append for discrete ledger entries where practical. Do not claim API locking
 or concurrency guarantees that the connector does not provide.
 
-Local Markdown required by CE is a working copy: include canonical page URL and
+Local Markdown required by CE is a working copy: include canonical artifact URL and
 fetch revision/date, synchronize edits before handoff, and retain an explicit
 unsynchronized flag when ClickUp is unavailable. Do not silently adopt two
 authoritative versions. Migrate an existing repository ledger only after reading

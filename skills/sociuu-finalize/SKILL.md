@@ -14,7 +14,9 @@ release must remain partial.
 
 If a task exists, refresh its Ledger and QA Runbook, actual QA/test reports,
 all MR links, known Figma references and relevant repository artifacts.
-Use Sociuu Task for document synchronization and native associations.
+Use Sociuu Task to synchronize records and the description's **Links & artefacts**
+section. Verify all participating MRs, Figma/Figma Make and relevant artifact
+links. Native associations are optional; attachments may hold the current records.
 Ask only for a necessary artifact or identity that cannot be discovered;
 mark absent optional designs/ADRs not applicable rather than inventing them.
 

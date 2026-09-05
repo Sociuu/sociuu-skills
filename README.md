@@ -17,7 +17,7 @@ evidence; humans own merge and deployment.
 
 | Skill | Needs |
 | --- | --- |
-| sociuu-task | ClickUp task, Doc and native relationship access |
+| sociuu-task | ClickUp task description and artifact/attachment access |
 | sociuu-investigate | Relevant repository and evidence connectors |
 | sociuu-resolve-git | Glab for GitLab; CE resolver and gh for GitHub |
 | sociuu-aq | Dock skill/CLI, Apex Scaffolding, CE Dogfood and agent-browser |
@@ -36,6 +36,11 @@ Repositories must load their checked-in Sociuu delivery instructions through
 AGENTS.md and CLAUDE.md. Those require the canonical ClickUp Ledger and QA
 Runbook for every implementation task, even when QA is not applicable. Installing
 skills alone does not establish that always-on repository policy.
+
+The task description's **Links & artefacts** section is the required shared index.
+Ledger and QA Runbook attachments are acceptable; identify current and superseded
+versions. Native associations are optional, and ClickUp Docs are not required.
+Preserve existing artifacts rather than migrating them just for presentation.
 
 Resolve old project-local skills with the same names before adoption; do not
 overwrite workspace isolation providers. Personal autonomy instructions remain

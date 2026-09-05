@@ -13,6 +13,8 @@ small safe fixes, regression tests, commits, and its durable report.
 ## Preflight
 
 Read the canonical ClickUp QA Runbook and ledger before preparing any runtime.
+Locate their current records through the task description's **Links & artefacts**
+section; task attachments are acceptable and ClickUp Docs are not required.
 If required documents are missing, use Sociuu Task. If browser/human QA is
 explicitly not applicable, verify the rationale against the change, record the
 alternative automated/operational checks and return without starting Dogfood.
