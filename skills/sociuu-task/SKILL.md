@@ -14,8 +14,15 @@ Investigation-only requests do not authorize task mutations.
 
 Before implementation, establish scope, acceptance criteria, affected repositories,
 source links and known unknowns. Preserve human descriptions and ownership.
-Use repository/workspace list routing; Houston work belongs in Houston regardless
-of size. Query actual statuses and fields rather than guessing IDs.
+Use explicit task routing first. Otherwise apply these Sociuu defaults in order:
+
+- Houston work: Houston list `901816242128`.
+- Roadmap initiatives, PRDs and broader planning: Sociuu App `900801780198`.
+- Bugs, minor improvements and work up to two development days: Fixes & Bugs `900801780299`.
+- Non-roadmap improvements over two development days: Enhancements `901816159903`.
+
+Resolve uncertainty from scope and current list metadata; ask only if it remains
+materially ambiguous. Query actual statuses and fields rather than guessing IDs.
 
 Find the task's existing Ledger and QA Runbook. Create missing documents using
 [task-documents.md](references/task-documents.md). They are canonical in ClickUp

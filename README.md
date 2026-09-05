@@ -5,7 +5,7 @@ Minimal, provider-neutral action skills for Sociuu engineering work.
 Install them with the open skills CLI:
 
 ```bash
-npx skills add Sociuu/sociuu-skills -g --skill '*' -a codex -a claude-code
+npx skills add Sociuu/sociuu-skills -g --skill '*' --agent codex claude-code
 ```
 
 The catalog composes existing owners rather than replacing them: Compound
