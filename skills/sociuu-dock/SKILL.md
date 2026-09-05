@@ -1,9 +1,14 @@
 ---
 name: sociuu-dock
-description: Inspect, reuse, or prepare the exact task-bound Sociuu Dock environment through the installed sociUU command. Use when local runtime behavior, browser QA, or synthetic data needs an isolated environment.
+description: Compatibility entrypoint to the Dock-owned skill for preparing or inspecting a Sociuu local environment. Use when an existing workflow requests sociuu-dock.
 ---
 
 # Sociuu Dock
+
+Load and follow the installed `dock` skill maintained by the Dock repository.
+Use its current command help and environment contract. This entrypoint carries
+no separate runtime implementation or copied command procedure. If the owner
+skill is missing, report the Dock setup prerequisite instead of guessing.
 
 Dock owns local runtime lifecycle: containers, URLs, databases, images, leases,
 and cleanup. Use the installed `sociuu` command and its selected task
