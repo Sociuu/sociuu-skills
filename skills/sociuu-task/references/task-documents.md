@@ -40,6 +40,16 @@ use link, packaging and instruction-behavior checks instead of product-browser Q
 The implementer maintains the brief; human QA and CE Dogfood challenge it against
 the actual change. Execution reports stay separate and are linked from the ledger.
 
+When roles, tenant settings, feature flags or data states interact, select a
+small risk-based set of combinations, including relevant denial and empty states.
+State intentional omissions rather than expanding to every possible combination.
+For data-dependent outcomes, define the expected values or invariants before
+checking results and pair visible UI with an independent API or persisted-state
+check where relevant. A changed value alone is not proof of correctness.
+Distinguish live integration evidence from mocked/component/route-smoke results.
+Reuse valid evidence after fixes; refresh checks affected by the change and its
+dependencies, without waiving CE's own final verification requirements.
+
 ## Multi-repository and milestones
 
 One task spans all repositories and MRs. Parent documents cover overall acceptance

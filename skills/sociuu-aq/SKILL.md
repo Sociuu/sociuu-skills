@@ -20,6 +20,11 @@ explicitly not applicable, verify the rationale against the change, record the
 alternative automated/operational checks and return without starting Dogfood.
 Missing required QA capability is blocked, never not applicable.
 
+Check that the runbook covers relevant tenant/role/configuration combinations
+and defines independent API or persisted-state checks for data-dependent UI
+outcomes. Distinguish live proof from mocks or route smoke checks. Fill concrete
+gaps in the existing runbook; do not introduce another planning or QA stage.
+
 1. Confirm the task-owned worktree and its exact environment binding through
    `sociuu-dock`.
 2. Reuse a healthy current environment. If it is missing, stale, or mismatched,

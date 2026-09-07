@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sociuu Production Hotfix"
+  short_description: "Enter the guarded Sociuu Production release procedure"
+  default_prompt: "Use $sociuu-ship-hotfix for the explicitly authorized Production hotfix."
+policy:
+  allow_implicit_invocation: false
