@@ -23,6 +23,7 @@ evidence; humans own merge and deployment.
 | sociuu-aq | Dock skill/CLI, Apex Scaffolding, CE Dogfood and agent-browser |
 | sociuu-finalize | Forge/CI and ClickUp; Dock/isolation for authorized cleanup |
 | sociuu-ship | Forge/CI read access; human merge |
+| sociuu-ship-hotfix | Explicit Production request; Apex's migrated protected release provider and its existing release prerequisites |
 | sociuu-dock | Existing Dock-owned skill (compatibility entrypoint) |
 | sociuu-task-isolation | Workspace-configured isolation provider |
 
@@ -31,6 +32,16 @@ does not install tools, grant access or provision an environment. Ordinary
 ChatGPT/Claude web chats without filesystem/tool access cannot execute local
 workflows; these are portable instructions, not a claim of identical host
 capabilities.
+
+For setup, follow the owning tools' installation and diagnostics: CE Setup for
+CE configuration, the Dock installer/doctor for runtime tooling, and
+agent-browser's installer for browser tooling. This package adds no separate
+workstation setup workflow. Verify connector access with each developer's own
+account. Re-run the installation command to refresh the selected skills.
+
+The optional, explicit-only hotfix entrypoint requires Apex's migrated
+`.agents/legacy/` release provider. Install it only alongside a compatible Apex
+revision; it does not migrate repositories or grant Production authority.
 
 Repositories must load their checked-in Sociuu delivery instructions through
 AGENTS.md and CLAUDE.md. Those require the canonical ClickUp Ledger and QA
