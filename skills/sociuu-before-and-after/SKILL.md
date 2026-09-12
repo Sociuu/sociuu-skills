@@ -1,18 +1,32 @@
 ---
-name: sociuu-baseline
-description: Measure Sociuu statistics or metrics behavior on a chosen client sample before and after a change using the read-only prod_read replica, and fold what it reveals back into Apex Scaffolding. Use for stats, metrics, aggregation, backfill or migration work.
+name: sociuu-before-and-after
+description: Prove a Sociuu change moved the numbers it intended and nothing else, by measuring the same question before and after it on a deliberate client sample over the read-only prod_read replica, then folding what it reveals back into Apex Scaffolding. Consider it whenever a change can alter a statistic, metric, count, rate, aggregate, backfill or migration outcome.
 ---
 
-# Sociuu Baseline
+# Sociuu Before and After
 
 A statistics change is only verified against the data it will actually meet. A
-green unit test proves the new formula computes; a before/after comparison on
-real client shapes proves it computes the right thing, and shows which of the
-old numbers were wrong on purpose.
+green unit test proves the new formula computes; measuring the same question
+twice on real client shapes proves it computes the right thing, and shows which
+of the old numbers were wrong on purpose.
 
-`prod_read` is a read-only replica reached through the jumphost tunnel. Use it
-for measurement only. Never point local verification at it as a data source,
-never copy rows out of it, and never let it substitute for Scaffolding.
+## Decide whether it applies
+
+This is not a stage every task runs. Judge it from the change itself, not from
+the task's label, and say which way you decided and why.
+
+Run it when the change can move a number a person or another system relies on:
+statistics and dashboard figures, engagement or adoption metrics, counts and
+rates, aggregation or scoreboard logic, a backfill, a data migration, or a fix
+to how existing rows are interpreted. Retroactive changes are the strongest
+signal — anything that alters what historical data *means* needs both readings.
+
+Skip it when the change cannot move a number: copy, styling, routing, validation
+messages, a purely additive endpoint, configuration with no computed output. Say
+so in one line rather than silently omitting it.
+
+If it is unclear, ask what the change is expected to do to existing figures. An
+answer of "nothing" is itself a measurable claim and worth one reading.
 
 ## Choose the sample
 
@@ -24,6 +38,10 @@ state why each was chosen.
 
 ## Measure
 
+`prod_read` is a read-only replica reached through the jumphost tunnel. Use it
+for measurement only. Never point local verification at it as a data source,
+never copy rows out of it, and never let it substitute for Scaffolding.
+
 Query from the Apex task worktree:
 
 ```sh
@@ -33,7 +51,7 @@ php artisan tinker --execute='...DB::connection("prod_read")->select(...)...'
 Check the tunnel first with `lsof -nP -iTCP:3308 -sTCP:LISTEN`; it is usually
 already open. Aggregate in the query. Do not select or print names, addresses,
 message bodies or other personal fields — counts, sums, ratios and identifiers
-are what a baseline needs.
+are what this needs.
 
 Capture the **before** numbers on the current behavior and keep the exact query
 text alongside them, so the **after** run is the same question asked twice. Run
@@ -59,5 +77,6 @@ which case moved and why, so the synthetic data and the fix stay in step. Keep
 every value synthetic; the shape is what transfers, never the content.
 
 Record the sample, both measurements, the explained deltas and the Scaffolding
-changes in the task ledger. This skill reads Production and writes nothing to
-it; any Production change needs its own authority and workflow.
+changes in the task ledger and QA Runbook, so the next change to the same figures
+starts from this reading. This skill reads Production and writes nothing to it;
+any Production change needs its own authority and workflow.

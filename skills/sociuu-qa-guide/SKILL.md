@@ -1,6 +1,6 @@
 ---
 name: sociuu-qa-guide
-description: Write the exact steps a developer follows to verify a Sociuu change themselves in their Dock environment, with real URLs, sign-in, data and expected results. Use instead of AQ when the change is cheaply verifiable by hand.
+description: Turn the task's QA Runbook into the exact steps a developer follows to verify a Sociuu change themselves in their Dock environment, with real URLs, sign-in, data and expected results. Use instead of AQ when the change is cheaply verifiable by hand.
 ---
 
 # Sociuu QA Guide
@@ -9,6 +9,35 @@ The output is a guide a person can follow without asking a follow-up question.
 Producing it costs almost nothing; running a browser agent costs a great deal.
 Write the guide by default and reserve `sociuu-aq` for surfaces no cheaper lane
 can reach.
+
+## Start from the QA Runbook
+
+The QA Runbook is the input to this skill, not just a place to file the result.
+Every Sociuu implementation task has one, written by whoever implemented the
+change; it holds the acceptance criteria, the tenant/role/configuration
+combinations that matter, and the scenarios earlier work on the same surface
+already proved worth checking.
+
+Read it before writing a single step. Locate it through the task description's
+**Links & artefacts** section or its attachments, via `sociuu-task`. If it is
+missing, use `sociuu-task` to establish it rather than inventing coverage from
+the diff alone — a guide written without it will test what the change touched
+instead of what the change has to satisfy.
+
+Work from it in three passes:
+
+- **Reuse.** Scenarios the runbook already defines become steps, in its terms.
+  Do not re-derive or rename them; a scenario that reads the same across tasks
+  is what makes regressions on this surface cheap to spot.
+- **Fill.** Where the runbook is thinner than the change — a combination it does
+  not cover, a data-dependent outcome with no independent check — extend it.
+- **Feed back.** Any scenario this guide adds, and anything the developer's run
+  discovers, goes back into the runbook through `sociuu-task`, so the next
+  change to this surface starts further along.
+
+Carry the runbook's acceptance criteria into the expected results verbatim where
+they are already precise. Where they are vague, sharpen them here and update the
+runbook with the sharper wording.
 
 ## Bind it to the real environment
 
@@ -47,6 +76,7 @@ affects. If a required persona or data shape is missing from Scaffolding, say
 which one and treat it as an Apex Scaffolding gap, never as a reason to insert
 rows by hand or to reach for Production data.
 
-Keep the guide in the task's QA Runbook through `sociuu-task` so the next change
-to the same surface reuses it. A written guide is not evidence: the task is
-verified when the developer reports the result, not when the guide is produced.
+Store the finished guide and every scenario it added in the task's QA Runbook
+through `sociuu-task`. A written guide is not evidence: the task is verified
+when the developer reports the result, not when the guide is produced — so record
+that result in the runbook too, including anything that failed or was skipped.

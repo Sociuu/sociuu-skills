@@ -21,7 +21,7 @@ evidence; humans own merge and deployment.
 | sociuu-investigate | Relevant repository and evidence connectors |
 | sociuu-verify | The repositories' own test tooling; Dock for the Playwright lane |
 | sociuu-qa-guide | A running Dock environment for the task |
-| sociuu-baseline | Apex checkout with the `prod_read` connection and its tunnel |
+| sociuu-before-and-after | Apex checkout with the `prod_read` connection and its tunnel |
 | sociuu-coderabbit | Authenticated CodeRabbit CLI (`coderabbit auth login`) |
 | sociuu-resolve-git | Glab for GitLab; CE resolver and gh for GitHub |
 | sociuu-aq | Dock skill/CLI, Apex Scaffolding, CE Dogfood and agent-browser |
@@ -39,8 +39,9 @@ Dock Apex, then the fixture-backed stubbed lane for CI, then a written human QA
 guide, and only then AQ. AQ is opt-in and never automatic. Both the repository
 code review and CodeRabbit run locally against the branch, and nothing is pushed
 and no merge request is opened until the gate closes. `sociuu-verify` holds it.
-Statistics and metrics changes add `sociuu-baseline`, whose findings are folded
-back into Apex Scaffolding so synthetic data keeps mimicking Production.
+Changes that can move a number add `sociuu-before-and-after`, whose findings are
+folded back into Apex Scaffolding so synthetic data keeps mimicking Production.
+The task's QA Runbook is the input to verification, not only its output.
 
 The workspace's own `AGENTS.md` is the authoritative statement of that flow;
 this catalog supplies the skills it routes to.

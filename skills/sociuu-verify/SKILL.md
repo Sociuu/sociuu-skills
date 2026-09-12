@@ -19,6 +19,12 @@ Two standing rules override convenience:
   applicable lane has run and every finding is fixed or explicitly accepted. The
   merge request is created when confidence is highest, not when code compiles.
 
+The task's QA Runbook defines what "verified" means for this change. Read it
+through `sociuu-task` before choosing lanes: its acceptance criteria and its
+tenant, role and configuration combinations decide which lanes are needed and
+what each one has to assert. A lane that passes without satisfying the runbook
+has not verified anything. Feed new scenarios and every lane result back into it.
+
 ## Lane selection
 
 Pick every lane that applies. Record the ones that do not, with the reason.
@@ -29,7 +35,7 @@ Pick every lane that applies. Record the ones that do not, with the reason.
 | Playwright against local Dock Apex | The change is visible in MyHub, or in Fuse once its lane exists | First choice for behavioral proof. Prime: `npm run e2e:myhub:live:local`. Create or extend specs rather than skipping the lane. |
 | Playwright stubbed | The change touches UI that CI must protect | `npm run e2e:myhub`. Update `e2e/fixtures/api/*.json` when the real contract moved — a fixture that no longer matches Apex is a defect, not a passing test. |
 | Human QA guide | The developer can verify it in a few steps | `sociuu-qa-guide`. Default substitute for AQ on ordinary UI work. |
-| Before/after baseline | Statistics, metrics, aggregation, backfill or migration behavior changes | `sociuu-baseline`. |
+| Before/after comparison | The change can move a statistic, metric, count, rate, aggregate, backfill or migration outcome | `sociuu-before-and-after`. Not every task; decide from the change and state which way you decided. |
 | AQ (`sociuu-aq`) | No Playwright lane can reach the surface — Fuse areas still without one, cross-surface journeys, exploratory risk | Only on request, or on an accepted recommendation. Say what it would cover that the other lanes cannot. |
 
 Pipeline lanes never target a live API. CI runs the stubbed lane against the
@@ -41,7 +47,7 @@ Run in this order and do not skip forward:
 
 1. Repository tests for every repository in the write set.
 2. The applicable Playwright lane, including new or updated specs.
-3. Baseline comparison, when the change class calls for it.
+3. Before/after comparison, when the change can move a number.
 4. Human QA guide produced, or AQ completed when it was agreed.
 5. Code review of the change: `compound-engineering:ce-code-review`.
 6. `sociuu-coderabbit`, last review before the merge request.
@@ -50,7 +56,7 @@ Run in this order and do not skip forward:
 
 A fix inside the gate reopens the lanes it could have broken. A fix that touches
 application behavior reopens the Playwright lane; a fix that touches data or
-aggregation reopens the baseline.
+aggregation reopens the before/after comparison.
 
 ## Report
 
