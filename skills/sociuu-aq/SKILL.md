@@ -1,6 +1,6 @@
 ---
 name: sociuu-aq
-description: Prepare task-bound Dock and Scaffolding prerequisites, then run Compound Engineering Dogfood directly as Sociuu's final browser QA guard. Use after implementation for browser-visible work or an explicit QA request.
+description: Prepare task-bound Dock and Scaffolding prerequisites, then run Compound Engineering Dogfood as Sociuu's browser QA guard. Use only on an explicit QA request or an agreed recommendation; never as an automatic stage.
 ---
 
 # Sociuu AQ
@@ -9,6 +9,19 @@ Sociuu AQ is a preflight and handoff, not a browser framework or a replacement
 for Compound Engineering Dogfood. Dock owns the runtime; Apex Scaffolding owns
 synthetic data; CE Dogfood owns diff analysis, journey mapping, browser QA,
 small safe fixes, regression tests, commits, and its durable report.
+
+## When AQ runs
+
+AQ is opt-in. Run it when the user asks for it, or when `sociuu-verify`
+recommended it for a surface no Playwright lane can reach and the user agreed.
+Do not start it because implementation finished, because the change is
+browser-visible, or because another skill's checklist mentions QA.
+
+Browser exploration is the most expensive evidence Sociuu produces. Before
+starting, confirm the cheaper lanes have already run and say what AQ will cover
+that they could not. If a Playwright lane could reach the surface, build or
+extend that lane instead; if the developer can verify it in a few steps, write
+the guide with `sociuu-qa-guide`.
 
 ## Preflight
 

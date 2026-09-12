@@ -19,6 +19,10 @@ evidence; humans own merge and deployment.
 | --- | --- |
 | sociuu-task | ClickUp task description and artifact/attachment access |
 | sociuu-investigate | Relevant repository and evidence connectors |
+| sociuu-verify | The repositories' own test tooling; Dock for the Playwright lane |
+| sociuu-qa-guide | A running Dock environment for the task |
+| sociuu-baseline | Apex checkout with the `prod_read` connection and its tunnel |
+| sociuu-coderabbit | Authenticated CodeRabbit CLI (`coderabbit auth login`) |
 | sociuu-resolve-git | Glab for GitLab; CE resolver and gh for GitHub |
 | sociuu-aq | Dock skill/CLI, Apex Scaffolding, CE Dogfood and agent-browser |
 | sociuu-finalize | Forge/CI and ClickUp; Dock/isolation for authorized cleanup |
@@ -26,6 +30,20 @@ evidence; humans own merge and deployment.
 | sociuu-ship-hotfix | Explicit Production request; Apex's migrated protected release provider and its existing release prerequisites |
 | sociuu-dock | Existing Dock-owned skill (compatibility entrypoint) |
 | sociuu-task-isolation | Workspace-configured isolation provider |
+
+## Delivery flow
+
+Verification runs cheapest-lane-first: repository tests in the task worktree
+(Apex's own test command, never through Dock), then Playwright against the local
+Dock Apex, then the fixture-backed stubbed lane for CI, then a written human QA
+guide, and only then AQ. AQ is opt-in and never automatic. Both the repository
+code review and CodeRabbit run locally against the branch, and nothing is pushed
+and no merge request is opened until the gate closes. `sociuu-verify` holds it.
+Statistics and metrics changes add `sociuu-baseline`, whose findings are folded
+back into Apex Scaffolding so synthetic data keeps mimicking Production.
+
+The workspace's own `AGENTS.md` is the authoritative statement of that flow;
+this catalog supplies the skills it routes to.
 
 CE and Dock are installed separately. Scaffolding stays in Apex. Installation
 does not install tools, grant access or provision an environment. Ordinary
