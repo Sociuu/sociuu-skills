@@ -1,47 +1,29 @@
 ---
 name: sociuu-coderabbit
-description: Run the CodeRabbit CLI over a Sociuu task branch before the merge request exists and triage its findings. Use as the final review gate after the repository code review and before any push.
+description: Run the second local review of a Sociuu branch against its verified base, after independent repository review and before push.
 ---
 
 # Sociuu CodeRabbit
 
-CodeRabbit reviews the local branch, so it runs *before* the push, not after the
-merge request. It is a second independent reviewer, not a replacement for
-`compound-engineering:ce-code-review`; run it after that review so it sees the
-code as it will actually be proposed.
+From each task-owned worktree, obtain the comparison base from the isolation
+record and confirm it resolves to the intended target history. A feature branch's
+upstream is not its comparison base. Never guess poc/main/master.
 
-## Run it
+Inspect installed CLI help for supported local review/base options. Bind the
+recorded base SHA using `--base-commit` when supported; otherwise use a verified
+`--base` target ref and record its resolved SHA. Include task-owned uncommitted
+changes using supported options when present; do not claim a committed-only review
+covered them. Prefer a stable committed candidate.
 
-From the task worktree, against the branch's real base:
+Run after independent repository review, before push. If authentication or the
+required mode is unavailable, use supported diagnostics and report the gap.
+A forge review is not an equivalent local result. Do not opt into extra paid
+credits unless authorized.
 
-```sh
-coderabbit review --agent --base "$(git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null || echo poc)"
-```
+Evaluate findings against intent, source and repository rules. Fix defects; reject
+unsupported rewrites or scope expansions with reasons. Report unrelated defects
+separately. Refresh evidence affected by repairs, not unrelated checks.
 
-Use the repository's staging branch as `--base` — Apex and Fuse target `poc`,
-Prime targets `main`, Admin targets `master`. Confirm the base the task was cut
-from rather than trusting the default; `sociuu-task-isolation` recorded it.
-
-`--agent` emits structured findings. Add `--uncommitted --include-untracked`
-only while the change is still uncommitted. Prefer reviewing committed work, so
-the findings match what the merge request will contain.
-
-Run each repository in the write set separately, from its own worktree.
-
-If the CLI reports it is not authenticated or not ready, run `coderabbit doctor`
-and report the prerequisite. Do not skip the gate silently and do not substitute
-a different reviewer for it.
-
-## Triage
-
-Findings are evidence, not instructions. For each one, decide: fix, or reject
-with a stated reason. Reject anything that contradicts the repository's
-`AGENTS.md`, its established patterns, or the task's agreed scope — CodeRabbit
-does not know Sociuu's tenancy, Scaffolding or contract rules.
-
-Fixes made here re-enter the verification gate: re-run the tests and the
-Playwright lane the fix could have broken before pushing. A finding that reveals
-a product defect outside the task's scope is reported, not quietly absorbed.
-
-Record the review outcome and every accepted or rejected finding in the task
-ledger. Never let CodeRabbit approve, push, comment on a forge, or merge.
+Record command, reviewed base/head and dirty-state scope, dispositions and gaps
+in the Ledger. Review output does not authorize push, approval, comments, merge
+or deployment.

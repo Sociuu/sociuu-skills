@@ -24,6 +24,7 @@ recommended action. Distinguish defect, expected behavior, configuration/data,
 implementation gap, environment failure and unresolved evidence.
 
 If the original request includes fixing the same issue, establish its ClickUp
-record with Sociuu Task and continue to CE Debug for a confirmed defect or
-CE Work for an approved implementation gap. Do not restart diagnosis or ask
+record with Sociuu Task and continue with one suitable implementation/diagnosis
+provider. CE Debug/Work are options for substantial work. Reuse valid findings;
+do not restart diagnosis or ask
 whether to continue merely because the skill boundary changed.
