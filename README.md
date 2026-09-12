@@ -1,77 +1,57 @@
 # Sociuu Skills
 
-Minimal, provider-neutral action skills for Sociuu engineering work.
+Provider-neutral action skills for Sociuu engineering. The
+[delivery contract](docs/delivery-contract.md) owns acceptance and delivery rules;
+[skill routing](docs/skill-routing.md) distinguishes conditional and explicit use.
+Distribute version-stamped contract copies to repository
+`docs/agents/sociuu-delivery.md`; each AGENTS.md/CLAUDE.md loads its local copy.
+Standalone repositories do not depend on another developer's workspace path.
 
-Install them with the open skills CLI:
+## Install
 
-```bash
+```sh
 npx skills add Sociuu/sociuu-skills -g --skill '*' --agent codex claude-code
 ```
 
-The catalog composes existing owners rather than replacing them: Compound
-Engineering owns code work and browser dogfooding; Dock owns local runtime
-lifecycle; Apex Scaffolding owns synthetic data; the forge and CI own delivery
-evidence; humans own merge and deployment.
+Install a reviewed source revision consistently across hosts. Check the installed
+CLI's supported pin/ref syntax rather than inventing it. One source per skill;
+preserve workspace isolation providers instead of replacing them with this
+package's compatibility adapter. Validate resolved paths and missing dependencies.
+Do not change active tasks' providers mid-run. Personal instructions/model aliases
+stay outside this team package. Managed plugin caches are not edit targets.
 
-## Catalog and prerequisites
+## Catalog
 
-| Skill | Needs |
+| Skill | Needs / trigger |
 | --- | --- |
-| sociuu-task | ClickUp task description and artifact/attachment access |
-| sociuu-investigate | Relevant repository and evidence connectors |
-| sociuu-verify | The repositories' own test tooling; Dock for the Playwright lane |
-| sociuu-qa-guide | A running Dock environment for the task |
-| sociuu-before-and-after | Apex checkout with the `prod_read` connection and its tunnel |
-| sociuu-coderabbit | Authenticated CodeRabbit CLI (`coderabbit auth login`) |
-| sociuu-resolve-git | Glab for GitLab; CE resolver and gh for GitHub |
-| sociuu-aq | Dock skill/CLI, Apex Scaffolding, CE Dogfood and agent-browser |
-| sociuu-finalize | Forge/CI and ClickUp; Dock/isolation for authorized cleanup |
-| sociuu-ship | Forge/CI read access; human merge |
-| sociuu-ship-hotfix | Explicit Production request; Apex's migrated protected release provider and its existing release prerequisites |
-| sociuu-dock | Existing Dock-owned skill (compatibility entrypoint) |
+| sociuu-task | ClickUp; implementation records and meaningful updates |
+| sociuu-investigate | Read-only repository/tenant evidence; ambiguous reports |
+| sociuu-verify | Product checks; select and reconcile acceptance evidence |
+| sociuu-qa-guide | Exact Dock environment; economical human checks |
+| sociuu-before-and-after | Authorized prod_read measurement; numeric changes |
+| sociuu-coderabbit | Authenticated CLI; second local pre-push review |
+| sociuu-resolve-git | Forge tools; authorized existing-feedback handling |
+| sociuu-aq | Explicit QA; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
+| sociuu-finalize | Authorized post-staging reconciliation and cleanup |
+| sociuu-ship | Explicit human merge handoff |
+| sociuu-ship-hotfix | Explicit Production scope; existing protected Apex provider |
+| sociuu-dock | Compatibility entrypoint to separately installed Dock owner |
 | sociuu-task-isolation | Workspace-configured isolation provider |
 
-## Delivery flow
+CE and selected Matt Pocock skills are optional engineering providers. Routine
+work does not require a full plugin lifecycle. Dock owns runtime/database state;
+Apex owns synthetic Scaffolding; humans own merge/deployment. Install tools through
+their owning setup workflows. Installation grants no access or runtime authority.
+Hosts without filesystem/tools cannot execute local procedures and must say so.
 
-Verification runs cheapest-lane-first: repository tests in the task worktree
-(Apex's own test command, never through Dock), then Playwright against the local
-Dock Apex, then the fixture-backed stubbed lane for CI, then a written human QA
-guide, and only then AQ. AQ is opt-in and never automatic. Both the repository
-code review and CodeRabbit run locally against the branch, and nothing is pushed
-and no merge request is opened until the gate closes. `sociuu-verify` holds it.
-Changes that can move a number add `sociuu-before-and-after`, whose findings are
-folded back into Apex Scaffolding so synthetic data keeps mimicking Production.
-The task's QA Runbook is the input to verification, not only its output.
+Preserve existing ClickUp records and attachments. The Links & artefacts section
+identifies current Ledger/QA records and participating MRs; native associations
+and new ClickUp Docs are not requirements. Keep small tasks' records small.
 
-The workspace's own `AGENTS.md` is the authoritative statement of that flow;
-this catalog supplies the skills it routes to.
+## Validation
 
-CE and Dock are installed separately. Scaffolding stays in Apex. Installation
-does not install tools, grant access or provision an environment. Ordinary
-ChatGPT/Claude web chats without filesystem/tool access cannot execute local
-workflows; these are portable instructions, not a claim of identical host
-capabilities.
-
-For setup, follow the owning tools' installation and diagnostics: CE Setup for
-CE configuration, the Dock installer/doctor for runtime tooling, and
-agent-browser's installer for browser tooling. This package adds no separate
-workstation setup workflow. Verify connector access with each developer's own
-account. Re-run the installation command to refresh the selected skills.
-
-The optional, explicit-only hotfix entrypoint requires Apex's migrated
-`.agents/legacy/` release provider. Install it only alongside a compatible Apex
-revision; it does not migrate repositories or grant Production authority.
-
-Repositories must load their checked-in Sociuu delivery instructions through
-AGENTS.md and CLAUDE.md. Those require the canonical ClickUp Ledger and QA
-Runbook for every implementation task, even when QA is not applicable. Installing
-skills alone does not establish that always-on repository policy.
-
-The task description's **Links & artefacts** section is the required shared index.
-Ledger and QA Runbook attachments are acceptable; identify current and superseded
-versions. Native associations are optional, and ClickUp Docs are not required.
-Preserve existing artifacts rather than migrating them just for presentation.
-
-Resolve old project-local skills with the same names before adoption; do not
-overwrite workspace isolation providers. Personal autonomy instructions remain
-outside this catalog.
+`python3 scripts/validate_catalog.py` checks skill metadata and relative links.
+`python3 scripts/validate_catalog.py --repository PATH` also checks that a
+repository's delivery copy exactly matches the authored contract. Run for each
+changed distribution target. This checks packaging/drift, not agent behavior;
+use the routing scenarios in docs/routing-scenarios.md for behavioral qualification.

@@ -5,7 +5,9 @@ when records are missing. Do not create or require ClickUp Docs. Preserve existi
 artifacts, including already-used Docs; no migration or deletion is required.
 The main task description's **Links & artefacts** section identifies the current
 records and distinguishes superseded attachment versions. Scale length to task
-risk; headings are prompts, not reasons to manufacture content.
+risk; headings are prompts, not reasons to manufacture content. A small task may
+keep Ledger and QA Runbook as named sections of one canonical artifact. Preserve
+existing separate records; do not migrate just for presentation.
 
 ## Ledger
 
@@ -48,7 +50,8 @@ checking results and pair visible UI with an independent API or persisted-state
 check where relevant. A changed value alone is not proof of correctness.
 Distinguish live integration evidence from mocked/component/route-smoke results.
 Reuse valid evidence after fixes; refresh checks affected by the change and its
-dependencies, without waiving CE's own final verification requirements.
+dependencies. The shared delivery contract selects the verification provider;
+do not add another provider's whole lifecycle to an already-proven lane.
 
 ## Multi-repository and milestones
 

@@ -19,4 +19,5 @@ failed provider. If the workspace has no configured isolation provider, stop
 and request setup rather than guessing the branch or base.
 
 This skill owns only isolation. Dock owns runtime setup; product repositories
-own code and tests; Compound Engineering owns code-work workflows.
+own code and tests; the shared delivery contract selects implementation and
+review providers.

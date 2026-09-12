@@ -5,10 +5,9 @@ description: Turn the task's QA Runbook into the exact steps a developer follows
 
 # Sociuu QA Guide
 
-The output is a guide a person can follow without asking a follow-up question.
-Producing it costs almost nothing; running a browser agent costs a great deal.
-Write the guide by default and reserve `sociuu-aq` for surfaces no cheaper lane
-can reach.
+Produce a guide a person can follow for economical human verification. Select it
+for acceptance gaps or useful supplemental checks; AQ remains a separately agreed
+exploratory option. Reuse the current runbook instead of creating another QA brief.
 
 ## Start from the QA Runbook
 
@@ -77,6 +76,7 @@ which one and treat it as an Apex Scaffolding gap, never as a reason to insert
 rows by hand or to reach for Production data.
 
 Store the finished guide and every scenario it added in the task's QA Runbook
-through `sociuu-task`. A written guide is not evidence: the task is verified
-when the developer reports the result, not when the guide is produced — so record
-that result in the runbook too, including anything that failed or was skipped.
+through `sociuu-task`. Required human-only acceptance stays pending until the
+developer reports the result, including failures/skips. If automated evidence
+already proves the criteria, label the guide supplemental rather than making it
+a new blocking gate. Guide production itself is not execution evidence.

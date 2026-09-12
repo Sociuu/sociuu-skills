@@ -28,7 +28,9 @@ Find the task's existing Ledger and QA Runbook through its description and attac
 [task-documents.md](references/task-documents.md). They are canonical in ClickUp
 for every implementation, bug, maintenance or infrastructure task. A QA Runbook
 always exists, including explicit QA-not-applicable rationale and substitute
-verification. Do not create an independent task ledger per repository.
+verification. Small tasks may use named Ledger and QA Runbook sections in one
+canonical artifact; preserve existing separate documents. Do not create an
+independent task ledger per repository.
 
 Maintain a clearly named **Links & artefacts** section in the main task description.
 Include every participating MR, Figma/Figma Make reference, Ledger, QA Runbook,
@@ -44,7 +46,8 @@ completion gates; do not require Computer Use to maintain them.
 ## Maintain
 
 Update at scope changes, meaningful implementation milestones, review, QA and
-handoff. Keep status truthful; a published MR is not a staging release.
+handoff. Reuse fetched read-only context within a phase until it changes; freshness
+before a write remains required. Keep status truthful; an MR is not a release.
 Read current task and record content immediately before each update, preserve others' sections,
 and refetch after writing. If another contributor changes an overlapping section,
 reconcile or ask that owner; never replace it from a stale local copy.

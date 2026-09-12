@@ -6,13 +6,13 @@ projects/:id/merge_requests/:iid, its discussions and commits; discussions have
 reply and resolution operations. Encode project paths and paginate to completion.
 
 1. Read MR metadata, source SHA, diff and requested discussions including replies.
-2. Read the installed CE Resolve PR Feedback evaluation rubric when available.
-   Use its technical judgement guidance; exclude its GitHub API/platform steps.
+2. Establish intent and repository requirements. Use a CE evaluation rubric only
+   when needed; exclude GitHub API/platform steps.
 3. Evaluate concerns against code/spec/tests. Group the same root cause. Fix,
    fix differently, explain already-fixed/declined items, or leave a material
    unresolved decision for the human with a recommendation.
-4. Make authorized fixes in the task-owned checkout, using CE Debug/Work as
-   appropriate. Run affected checks, commit/push within scope and verify that
+4. Make authorized fixes in the task-owned checkout with one suitable provider.
+   Run affected checks and the required review gate, commit/push within scope and verify that
    the MR's remote source contains the fix.
 5. Reply with disposition, evidence and tested revision. Search existing replies
    first to avoid duplicate posts on retries. Resolve eligible threads only

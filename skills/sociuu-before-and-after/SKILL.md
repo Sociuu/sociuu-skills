@@ -5,10 +5,10 @@ description: Prove a Sociuu change moved the numbers it intended and nothing els
 
 # Sociuu Before and After
 
-A statistics change is only verified against the data it will actually meet. A
-green unit test proves the new formula computes; measuring the same question
-twice on real client shapes proves it computes the right thing, and shows which
-of the old numbers were wrong on purpose.
+Compare numeric behavior on deliberate real-client shapes alongside synthetic
+tests. Sampling can expose missed cases; it does not prove every possible input.
+Read-only access follows the repository's Production authority. Local verification
+must remain runnable with synthetic data when that access is unavailable.
 
 ## Decide whether it applies
 
@@ -21,12 +21,12 @@ rates, aggregation or scoreboard logic, a backfill, a data migration, or a fix
 to how existing rows are interpreted. Retroactive changes are the strongest
 signal — anything that alters what historical data *means* needs both readings.
 
-Skip it when the change cannot move a number: copy, styling, routing, validation
-messages, a purely additive endpoint, configuration with no computed output. Say
-so in one line rather than silently omitting it.
+Mark it not applicable when behavior cannot alter numeric outcomes, such as a
+pure copy/style change. Classify endpoints, routing and configuration by actual
+effects, not their labels. State the reason in one line.
 
-If it is unclear, ask what the change is expected to do to existing figures. An
-answer of "nothing" is itself a measurable claim and worth one reading.
+Resolve unclear applicability from code and acceptance criteria; ask only when a
+material product ambiguity remains. Do not query Production solely for ritual proof.
 
 ## Choose the sample
 

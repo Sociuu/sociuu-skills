@@ -10,6 +10,10 @@ revisions, post-merge pipelines and applicable staging deployment/verification.
 A successful merge alone does not prove staging delivery. A partial multi-repo
 release must remain partial.
 
+For non-deployable documentation/instruction changes, staging is not applicable
+with a stated reason. Verify merge, applicable CI, packaging/links and instruction
+behavior instead. This exception does not waive staging for deployable changes.
+
 ## Task completion
 
 If a task exists, refresh its Ledger and QA Runbook, actual QA/test reports,
