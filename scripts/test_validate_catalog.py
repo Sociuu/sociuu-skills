@@ -36,6 +36,19 @@ class CatalogTests(unittest.TestCase):
         self.skill.write_text('---\nname: wrong\ndescription: Example\n---\n')
         self.assertTrue(any('mismatched skill name' in e for e in validate(self.root, [])))
 
+    def test_rejects_absolute_link_even_when_it_exists(self):
+        target = self.root / 'docs/delivery-contract.md'
+        (self.root / 'README.md').write_text(f'[contract]({target})\n')
+        self.assertTrue(any('nonportable link' in e for e in validate(self.root, [])))
+
+    def test_rejects_existing_target_outside_package(self):
+        with tempfile.TemporaryDirectory(dir=self.root.parent) as directory:
+            target = Path(directory) / 'outside.md'
+            target.write_text('outside\n')
+            relative = f'../{Path(directory).name}/outside.md'
+            (self.root / 'README.md').write_text(f'[outside]({relative})\n')
+            self.assertTrue(any('nonportable link' in e for e in validate(self.root, [])))
+
     def test_rejects_missing_and_stale_distribution(self):
         repository = self.root / 'consumer'
         self.assertTrue(validate(self.root, [repository]))

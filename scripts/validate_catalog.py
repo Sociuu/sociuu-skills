@@ -23,7 +23,10 @@ def validate(root: Path, repositories: list[Path]) -> list[str]:
             if '://' in target or target.startswith('#'):
                 continue
             destination = target.split('#', 1)[0]
-            if not (path.parent / destination).exists():
+            resolved = (path.parent / destination).resolve()
+            if Path(destination).is_absolute() or not resolved.is_relative_to(root.resolve()):
+                errors.append(f'{path}: nonportable link {target}')
+            elif not resolved.exists():
                 errors.append(f'{path}: broken relative link {target}')
         # Package dependencies; external runtime/provider names are not catalog skills.
         for name in re.findall(r'\b(sociuu-[a-z][a-z-]+)\b', text):
