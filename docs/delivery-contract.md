@@ -109,6 +109,11 @@ After human merge and verified staging proof, `sociuu-finalize` handles authoriz
 follow-through. Release runtime before eligible worktree cleanup. Preserve dirty,
 unpushed, shared or active resources; no age-based cleanup.
 
+For non-deployable documentation/instruction changes, record staging as not
+applicable with a reason. Verified merge, applicable CI, packaging/link checks
+and instruction-behavior evidence support finalization instead. Deployable
+application changes retain their applicable staging proof.
+
 ## Skill selection
 
 Explicit requests include ordinary language. Load skills for real triggers, not
