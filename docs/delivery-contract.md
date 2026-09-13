@@ -47,6 +47,12 @@ required constraints and clear ownership. Return evidence and uncertainty;
 validate integration without repeating every worker read. Report unavailable
 capabilities. Personal model preferences stay outside team skills.
 
+Use [model routing](model-routing.md) to separate coordinator decisions, bounded
+implementation and read-only evidence collection. A lower-capability worker may
+collect connector/API facts or implement a specified low-risk unit; the coordinator
+keeps tenancy, data, contract and final-integration decisions. Do not delegate by
+file count alone or create recursive teams.
+
 ## Verification
 
 `sociuu-verify` selects evidence and holds the pre-push gate. Use the cheapest

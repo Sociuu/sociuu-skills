@@ -19,6 +19,10 @@ technical diagnosis when appropriate, preserving the request's read-only ceiling
 Do not create tasks, modify configuration or send messages for an investigation-only
 request. If local reproduction needs changes, use only authorized isolated setup.
 
+When connector/API evidence is independent, a focused lower-capability evidence
+worker may collect and cite it. Give it the exact question and read-only boundary;
+the coordinating agent evaluates contradictions and makes the classification.
+
 Return the supported classification, cause/confidence, evidence, unknowns and
 recommended action. Distinguish defect, expected behavior, configuration/data,
 implementation gap, environment failure and unresolved evidence.

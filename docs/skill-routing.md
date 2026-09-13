@@ -8,6 +8,8 @@ These are policy rules; host-specific discovery controls require validation.
 | --- | --- | --- |
 | Factual question/trivial edit | Direct tools/response | No workflow by default |
 | Ambiguous report | sociuu-investigate | Conditional; read-only unless fix authorized |
+| Independent read-only evidence from connectors or documents | Focused evidence worker | Conditional; coordinator selects supported low-cost capability and validates result |
+| Specified low-risk framework unit | Focused implementation worker | Conditional; coordinator owns semantics, integration and verification |
 | Implementation start/evidence milestone | sociuu-task | Conditional |
 | First write/expanded write set | sociuu-task-isolation | Conditional before writes |
 | Bounded understood implementation | Host coding tools | Default |

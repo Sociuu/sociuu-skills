@@ -3,8 +3,10 @@
 Provider-neutral action skills for Sociuu engineering. The
 [delivery contract](docs/delivery-contract.md) owns acceptance and delivery rules;
 [skill routing](docs/skill-routing.md) distinguishes conditional and explicit use.
-Distribute version-stamped contract copies to repository
-`docs/agents/sociuu-delivery.md`; each AGENTS.md/CLAUDE.md loads its local copy.
+[Model routing](docs/model-routing.md) assigns capability roles for bounded workers
+without making a provider/model choice part of the shared contract.
+Distribute version-stamped contract and model-routing copies to repository
+`docs/agents/`; each AGENTS.md/CLAUDE.md loads its local delivery contract.
 Standalone repositories do not depend on another developer's workspace path.
 
 ## Install

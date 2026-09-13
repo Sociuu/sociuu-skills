@@ -17,12 +17,14 @@ class CatalogTests(unittest.TestCase):
         (self.root / 'README.md').write_text('# Catalog\n')
         (self.root / 'docs').mkdir()
         (self.root / 'docs/delivery-contract.md').write_text('contract\n')
+        (self.root / 'docs/model-routing.md').write_text('routing\n')
 
     def test_accepts_matching_distribution(self):
         repository = self.root / 'consumer'
         target = repository / 'docs/agents/sociuu-delivery.md'
         target.parent.mkdir(parents=True)
         target.write_text('contract\n')
+        (repository / 'docs/agents/model-routing.md').write_text('routing\n')
         self.assertEqual(validate(self.root, [repository]), [])
 
     def test_rejects_missing_dependency_and_relative_link(self):
