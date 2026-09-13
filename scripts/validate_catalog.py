@@ -31,14 +31,21 @@ def validate(root: Path, repositories: list[Path]) -> list[str]:
         # Package dependencies; external runtime/provider names are not catalog skills.
         for name in re.findall(r'\b(sociuu-[a-z][a-z-]+)\b', text):
             if name not in names and name not in {
-                'sociuu-skills', 'sociuu-delivery', 'sociuu-delivery-contract'
+                'sociuu-skills',
+                'sociuu-delivery',
+                'sociuu-delivery-contract',
+                'sociuu-model-routing',
             }:
                 errors.append(f'{path}: unresolved package name {name}')
     source = root / 'docs/delivery-contract.md'
+    model_routing = root / 'docs/model-routing.md'
     for repository in repositories:
         destination = repository / 'docs/agents/sociuu-delivery.md'
         if not destination.exists() or destination.read_bytes() != source.read_bytes():
             errors.append(f'{repository}: delivery contract missing or drifted')
+        routing_destination = repository / 'docs/agents/model-routing.md'
+        if not routing_destination.exists() or routing_destination.read_bytes() != model_routing.read_bytes():
+            errors.append(f'{repository}: model routing missing or drifted')
     return sorted(set(errors))
 
 
