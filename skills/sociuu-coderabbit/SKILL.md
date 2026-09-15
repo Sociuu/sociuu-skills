@@ -1,6 +1,6 @@
 ---
 name: sociuu-coderabbit
-description: Run the second local review of a Sociuu branch against its verified base, after independent repository review and before push.
+description: Run an explicitly requested local CodeRabbit opinion for a Sociuu branch against its verified base.
 ---
 
 # Sociuu CodeRabbit
@@ -15,9 +15,10 @@ recorded base SHA using `--base-commit` when supported; otherwise use a verified
 changes using supported options when present; do not claim a committed-only review
 covered them. Prefer a stable committed candidate.
 
-Run after independent repository review, before push. If authentication or the
-required mode is unavailable, use supported diagnostics and report the gap.
-A forge review is not an equivalent local result. Do not opt into extra paid
+Run only when the developer explicitly requests CodeRabbit. It supplements the
+required independent repository review and never blocks push or merge-request
+creation. If authentication or the requested mode is unavailable, report that
+result and continue the ordinary delivery gate. Do not opt into extra paid
 credits unless authorized.
 
 Evaluate findings against intent, source and repository rules. Fix defects; reject

@@ -91,23 +91,24 @@ link, packaging, instruction-behavior and review checks, not product-browser QA.
 
 ## Review and publication
 
-Complete two local reviews before push:
+Complete one independent local review before push:
 
 1. One independent repository review of exact diff, intent, standards and evidence.
    A supported native independent review or fresh reviewer covers correctness,
    tests and standards together. Add specialists for concrete uncovered risk.
    Deep CE review replaces this first review; do not stack review frameworks.
    Author self-review is not independent evidence.
-2. `sociuu-coderabbit` against the isolation record's verified comparison base.
-   Do not infer the base from the feature branch's upstream.
+2. When the developer explicitly requests CodeRabbit, run `sociuu-coderabbit`
+   against the isolation record's verified comparison base. It is supplemental
+   evidence and does not hold the ordinary delivery gate.
 
-Triage findings: fix defects, reject unsupported scope expansions with reasons.
+Triage review findings: fix defects, reject unsupported scope expansions with reasons.
 Refresh affected tests/review after fixes. Reproducible evidence may validate
 findings; another opinion need not mean another team. Missing required reviewers
 are gaps, not silent substitutions. Preserve separately required external reviews;
 do not request duplicate forge bot reviews merely on publication.
 
-Push/open the MR only after applicable verification, both reviews and required
+Push/open the MR only after applicable verification, the independent review and required
 human acceptance are complete and publication is authorized. Link task and
 current evidence. An incomplete gate never licenses early push.
 

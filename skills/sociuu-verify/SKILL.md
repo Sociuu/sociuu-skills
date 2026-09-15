@@ -34,10 +34,12 @@ Fixes reopen affected, applicable evidence, not every lane.
    and evidence. Native independent review or a fresh reviewer covers correctness,
    tests and standards. Add specialists only for concrete uncovered risk. Deep CE
    review replaces this pass rather than adding a third workflow.
-3. Run sociuu-coderabbit as the second local review.
+3. When the developer explicitly requests CodeRabbit, run `sociuu-coderabbit`
+   as a supplemental local opinion and record its result.
 4. Fix retained findings or reject with reasons; refresh invalidated tests/review.
    No silent replacement for a required reviewer.
-5. Push/open the MR only when this gate closes and publication is authorized.
+5. Push/open the MR only when required evidence and independent review close the
+   gate and publication is authorized.
 
 Record passed, failed, pending, not applicable with reason, or skipped with authority
 in the Ledger/QA Runbook. Fixtures, CI and review alone are not live acceptance.
