@@ -19,7 +19,6 @@ These are policy rules; host-specific discovery controls require validation.
 | Integrated runtime/data needed | dock / Apex Scaffolding | Conditional |
 | Numeric meaning changes | sociuu-before-and-after | Conditional assessment; access authority applies |
 | Economical uncovered human checks | sociuu-qa-guide | Conditional |
-| Second local review | sociuu-coderabbit | Conditional after repository review |
 | Existing review feedback | sociuu-resolve-git | Conditional within authorized scope |
 | Shipping/post-staging follow-through | sociuu-ship / sociuu-finalize | Specific request or authorized continuation |
 | Exploratory QA | sociuu-aq → ce-dogfood | Explicit |
