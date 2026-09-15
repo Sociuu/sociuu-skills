@@ -17,11 +17,11 @@ reply and resolution operations. Encode project paths and paginate to completion
 5. Reply with disposition, evidence and tested revision. Search existing replies
    first to avoid duplicate posts on retries. Resolve eligible threads only
    after verifying the reply and repair; honor human questions and repository
-   reviewer/bot resolution policy. Top-level comments may not be resolvable.
+   discussion-resolution policy. Top-level comments may not be resolvable.
 6. Refetch discussions and source SHA. If source changed concurrently, reconcile
    it before further mutation. Report any new or unanswered feedback.
-   Resolve bot feedback that already exists. Record an unavailable or rate-limited
-   bot as unavailable; it is not a reason to wait for a new review.
+   Existing unresolved discussions are the scope. A missing reviewer or absent
+   new feedback never creates a wait.
 
 Use structured text arguments or body files; avoid interpolation of comment
 content into shell commands. Keep external-review requirements explicit.

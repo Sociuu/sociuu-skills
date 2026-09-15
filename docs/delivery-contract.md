@@ -98,15 +98,10 @@ Complete one independent local review before push:
    tests and standards together. Add specialists for concrete uncovered risk.
    Deep CE review replaces this first review; do not stack review frameworks.
    Author self-review is not independent evidence.
-2. When the developer explicitly requests CodeRabbit, run `sociuu-coderabbit`
-   against the isolation record's verified comparison base. It is supplemental
-   evidence and does not hold the ordinary delivery gate.
-
 Triage review findings: fix defects, reject unsupported scope expansions with reasons.
 Refresh affected tests/review after fixes. Reproducible evidence may validate
-findings; another opinion need not mean another team. Missing required reviewers
-are gaps, not silent substitutions. Preserve separately required external reviews;
-do not request duplicate forge bot reviews merely on publication.
+findings; another opinion need not mean another team. A meaningful repair
+refreshes affected evidence.
 
 Push/open the MR only after applicable verification, the independent review and required
 human acceptance are complete and publication is authorized. Link task and

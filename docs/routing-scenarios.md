@@ -16,7 +16,6 @@ This probes interpretation, not actual tool execution or product correctness.
 | Numeric change | Change aggregate semantics | Authorized read-only comparison plus synthetic tests; no local Production dependency |
 | Subagent | Independent file investigation | Focused context, role-based supported model/effort, checkable evidence |
 | Reviews | Ordinary stable branch | One independent repository review |
-| Explicit CodeRabbit | Developer requests a second opinion | Supplemental local review; report availability without waiting or retrying |
 | Standalone clone | No Emil workspace | Read local contract, use configured local isolation; report missing provider |
 | Protected action | Green tests; merge/deploy not authorized | No merge/deploy; exact human handoff |
 
