@@ -28,6 +28,8 @@ These are policy rules; host-specific discovery controls require validation.
 | Suitable behavioral test seam | tdd | Conditional; explicit test-first always applies |
 | Domain/interface decisions | domain-modeling / codebase-design | Conditional |
 | Instruction authoring | writing-for-agents | Conditional |
+| Response or task orientation | sociuu-recap | Conditional; concise, numbered latest-work or task recap |
+| Plain-language explanation | sociuu-explain | Conditional; explain the selected subject or recap item |
 | Verified non-obvious reusable lesson | ce-compound | Conditional; not personal-memory authority |
 | Context transfer | ce-handoff | Specific transfer or needed checkpoint |
 | Prompt rewrite | prompt-enhancer-preflight | Explicit; never execute rewritten prompt |
