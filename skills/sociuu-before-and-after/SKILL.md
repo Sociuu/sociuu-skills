@@ -70,11 +70,22 @@ looked at again. When the comparison reveals a shape Scaffolding does not model
 breaks an aggregate — add it to the Apex Scaffolding blueprint, builders and
 verifier so the next change meets it locally.
 
-Model the data as it genuinely is, including the wrong-looking cases: Scaffolding
-should mimic Production, not an idealised version of it. When a fix makes a
-previously wrong shape correct, update Scaffolding in the same change and say
-which case moved and why, so the synthetic data and the fix stay in step. Keep
-every value synthetic; the shape is what transfers, never the content.
+Model data shapes as Production genuinely has them, including wrong-looking
+ones: legacy rows, unexpected nulls and inconsistent historical values belong in
+Scaffolding too.
+
+Tenant configuration follows a different rule. The shared generated tenant must
+represent the configuration most clients have, so never switch on a minority or
+behaviour-changing setting there to reproduce a shape. Generate supporting data
+that stays inert on its own, or put the configuration on its own tenant, as
+Apex's Scaffolding maintenance guide describes under "Feature Flags And Minority
+Configurations". Check how a new shape combines with existing generated data so
+it does not empty or distort another lane's result.
+
+When a fix makes a previously wrong shape correct, update Scaffolding in the
+same change and say which case moved and why, so the synthetic data and the fix
+stay in step. Keep every value synthetic; the shape is what transfers, never the
+content.
 
 Record the sample, both measurements, the explained deltas and the Scaffolding
 changes in the task ledger and QA Runbook, so the next change to the same figures
