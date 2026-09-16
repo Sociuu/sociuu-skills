@@ -26,6 +26,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-qa-guide | Exact Dock environment; economical human checks |
 | sociuu-before-and-after | Authorized prod_read measurement; numeric changes |
 | sociuu-explain | Plain-language Sociuu explanations and summaries |
+| sociuu-recap | Concise latest-work and task-history recaps |
 | sociuu-resolve-git | Forge tools; authorized existing-feedback handling |
 | sociuu-aq | Explicit QA; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
 | sociuu-finalize | Authorized post-staging reconciliation and cleanup |
