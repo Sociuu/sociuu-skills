@@ -34,7 +34,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-explain | Plain-language Sociuu explanations and summaries |
 | sociuu-recap | Concise latest-work and task-history recaps |
 | sociuu-resolve-git | Forge tools; authorized existing-feedback handling |
-| sociuu-aq | Explicit QA; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
+| sociuu-aq | Explicit request or accepted recommendation; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
 | sociuu-finalize | Authorized post-staging reconciliation and cleanup |
 | sociuu-ship | Explicit human merge handoff |
 | sociuu-ship-hotfix | Explicit Production scope; existing protected Apex provider |
