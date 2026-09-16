@@ -1,13 +1,7 @@
 # Sociuu Skills
 
-Provider-neutral action skills for Sociuu engineering. The
-[delivery contract](docs/delivery-contract.md) owns acceptance and delivery rules;
-[skill routing](docs/skill-routing.md) distinguishes conditional and explicit use.
-[Model routing](docs/model-routing.md) assigns capability roles for bounded workers
-without making a provider/model choice part of the shared contract.
-Distribute version-stamped contract and model-routing copies to repository
-`docs/agents/`; each AGENTS.md/CLAUDE.md loads its local delivery contract.
-Standalone repositories do not depend on another developer's workspace path.
+Provider-neutral action skills for bounded Sociuu engineering work. Repository
+instructions own product rules; each developer chooses their own workflow.
 
 ## Install
 
@@ -38,7 +32,6 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-ship | Explicit human merge handoff |
 | sociuu-ship-hotfix | Explicit Production scope; existing protected Apex provider |
 | sociuu-dock | Compatibility entrypoint to separately installed Dock owner |
-| sociuu-task-isolation | Workspace-configured isolation provider |
 
 CE and selected Matt Pocock skills are optional engineering providers. Routine
 work does not require a full plugin lifecycle. Dock owns runtime/database state;
@@ -53,7 +46,4 @@ and new ClickUp Docs are not requirements. Keep small tasks' records small.
 ## Validation
 
 `python3 scripts/validate_catalog.py` checks skill metadata and relative links.
-`python3 scripts/validate_catalog.py --repository PATH` also checks that a
-repository's delivery copy exactly matches the authored contract. Run for each
-changed distribution target. This checks packaging/drift, not agent behavior;
-use the routing scenarios in docs/routing-scenarios.md for behavioral qualification.
+This checks packaging, not agent behavior.

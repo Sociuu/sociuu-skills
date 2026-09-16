@@ -1,11 +1,13 @@
 ---
 name: sociuu-task
-description: Find, create and maintain the canonical Sociuu ClickUp task, Ledger and QA Runbook across repositories. Use before implementation and for task-document synchronization at milestones or handoff.
+description: Maintain the canonical ClickUp task, Ledger, and QA Runbook for Apex, Fuse, or Prime product work.
 ---
 
 # Sociuu Task
 
-Use the installed ClickUp connector, inspecting its current operations and fields.
+Use this skill for Apex, Fuse, or Prime product work. Dock, GitOps, Admin, and
+tooling work use it only when tracking is useful or an existing product task
+already owns the change. Inspect current ClickUp operations and fields.
 Search by supplied task ID, source report, feature and existing MR links before
 creating anything. Reuse a unique match; ask only when identity or scope conflicts.
 Investigation-only requests do not authorize task mutations.
