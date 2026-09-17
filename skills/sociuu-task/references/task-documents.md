@@ -50,7 +50,7 @@ checking results and pair visible UI with an independent API or persisted-state
 check where relevant. A changed value alone is not proof of correctness.
 Distinguish live integration evidence from mocked/component/route-smoke results.
 Reuse valid evidence after fixes; refresh checks affected by the change and its
-dependencies. The shared delivery contract selects the verification provider;
+dependencies. `sociuu-verify` selects the evidence;
 do not add another provider's whole lifecycle to an already-proven lane.
 
 ## Multi-repository and milestones

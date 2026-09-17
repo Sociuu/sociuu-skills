@@ -46,7 +46,8 @@ requested. Do not send messages without explicit authority. Report separate
 release, task-document, communication and cleanup outcomes so cleanup pending
 does not misrepresent a successful release.
 
-This skill does not merge, deploy, roll back or change product code. Production
-finalization stays with the separately authorized repository release procedure.
+This skill does not merge, deploy, roll back or change product code. After a
+verified Production release, whoever finalizes it sets `COMPLETE` with a release
+note; `sociuu-ship-hotfix` does this for hotfixes.
 A staging pipeline may supply evidence; it cannot clean a developer's local
 worktrees or impersonate their communications.

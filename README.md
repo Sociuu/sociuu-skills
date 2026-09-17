@@ -31,7 +31,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-aq | Explicit request or accepted recommendation; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
 | sociuu-finalize | Authorized post-staging reconciliation and cleanup |
 | sociuu-ship | Explicit human merge handoff |
-| sociuu-ship-hotfix | Explicit Production scope; existing protected Apex provider |
+| sociuu-ship-hotfix | Explicit Production scope; forge, CI and release-owner access |
 | sociuu-dock | Compatibility entrypoint to separately installed Dock owner |
 | sociuu-better-agent | Audit and progressively split a repository's AGENTS.md guidance |
 
