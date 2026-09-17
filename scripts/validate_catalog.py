@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Validate package links, skill identities, and optional distributed contracts."""
+"""Validate package links and skill identities."""
 import argparse
 import re
 from pathlib import Path
 
 
-def validate(root: Path, repositories: list[Path]) -> list[str]:
+def validate(root: Path) -> list[str]:
     errors = []
     skills = root / 'skills'
     names = {p.parent.name for p in skills.glob('*/SKILL.md')}
@@ -30,34 +30,18 @@ def validate(root: Path, repositories: list[Path]) -> list[str]:
                 errors.append(f'{path}: broken relative link {target}')
         # Package dependencies; external runtime/provider names are not catalog skills.
         for name in re.findall(r'\b(sociuu-[a-z][a-z-]+)\b', text):
-            if name not in names and name not in {
-                'sociuu-skills',
-                'sociuu-delivery',
-                'sociuu-delivery-contract',
-                'sociuu-model-routing',
-            }:
+            if name not in names and name != 'sociuu-skills':
                 errors.append(f'{path}: unresolved package name {name}')
-    source = root / 'docs/delivery-contract.md'
-    model_routing = root / 'docs/model-routing.md'
-    for repository in repositories:
-        destination = repository / 'docs/agents/sociuu-delivery.md'
-        if not destination.exists() or destination.read_bytes() != source.read_bytes():
-            errors.append(f'{repository}: delivery contract missing or drifted')
-        routing_destination = repository / 'docs/agents/model-routing.md'
-        if not routing_destination.exists() or routing_destination.read_bytes() != model_routing.read_bytes():
-            errors.append(f'{repository}: model routing missing or drifted')
     return sorted(set(errors))
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--repository', type=Path, action='append', default=[])
-    args = parser.parse_args()
-    errors = validate(Path(__file__).resolve().parents[1], args.repository)
+    argparse.ArgumentParser(description=__doc__).parse_args()
+    errors = validate(Path(__file__).resolve().parents[1])
     if errors:
         print('\n'.join(errors))
         return 1
-    print(f'Catalog valid; {len(args.repository)} distributed contracts checked.')
+    print('Catalog valid.')
     return 0
 
 

@@ -5,7 +5,7 @@ description: Select acceptance evidence for a Sociuu change and reconcile the pr
 
 # Sociuu Verify
 
-Read the repository delivery contract and canonical QA Runbook. Map each criterion
+Read the repository instructions and the task's QA Runbook. Map each criterion
 to the smallest adequate lane and expected result. Include relevant tenant/role/
 configuration cases; extend missing scenarios. A lane proves its assigned criteria,
 not necessarily the whole task.
@@ -13,7 +13,7 @@ not necessarily the whole task.
 | Lane | Selection |
 | --- | --- |
 | Repository tests | Changed behavior/adjacent risks in task worktrees. Apex: `php artisan test:isolated -- --filter=…`. |
-| Live browser tests | Applicable API/UI behavior. MyHub: `npm run e2e:myhub:live:local` against exact Dock binding. Houston uses Cypress; inspect other repositories' actual lanes. |
+| Live browser tests | Applicable API/UI behavior. MyHub: `npm run e2e:myhub:live` (signed-in) or `e2e:myhub:live:local` (public pages) against the exact Dock binding. Houston uses Cypress; inspect other repositories' actual lanes. |
 | Fixture browser tests | CI UI protection. MyHub: `npm run e2e:myhub`; update `e2e/fixtures/api/` with contracts. Count one run once. |
 | Human QA | sociuu-qa-guide for economical remaining checks; distinguish supplemental from required pending acceptance. |
 | Numeric comparison | sociuu-before-and-after when numeric outcomes can change; state applicability and follow access authority. |
@@ -36,8 +36,9 @@ Fixes reopen affected, applicable evidence, not every lane.
    review replaces this pass rather than adding a third workflow.
 3. Fix retained findings or reject with reasons; refresh invalidated tests/review.
    No silent replacement for a required reviewer.
-4. Push/open the MR only when required evidence and independent review close the
-   gate and publication is authorized.
+4. Push and open the MR once the independent review is closed and publication is
+   authorized, listing criteria still pending (for example dev-sandbox or human
+   checks, which need the MR pipeline). The gate closes when those pass.
 
 Record passed, failed, pending, not applicable with reason, or skipped with authority
 in the Ledger/QA Runbook. Fixtures, CI and review alone are not live acceptance.

@@ -1,43 +1,62 @@
 ---
 name: sociuu-ship-hotfix
-description: Enter Sociuu's protected Production hotfix procedure for an explicitly requested release, using the verified Apex release contracts for the affected repositories. Not for ordinary staging shipping.
+description: Release a reviewed fix to Sociuu Production on top of the version running there, for Apex, Fuse, Prime (Houston, MyHub) or Admin. Use only on an explicit Production hotfix request; ordinary releases go through staging with sociuu-ship and sociuu-finalize.
 disable-model-invocation: true
 ---
 
 # Sociuu Ship Hotfix
 
-Use only for an explicit Production hotfix request. This is a portable entrypoint,
-not a second release engine. A skill invocation does not supply missing release
-authority, credentials, or verification. Ordinary staging uses `sociuu-ship` and
-`sociuu-finalize`.
+A hotfix ships one reviewed fix on top of the exact version running in
+Production without releasing unreleased work from the integration branch. All
+deployable Sociuu repositories share this release model; confirm job names in
+each repository's `.gitlab-ci.yml` before acting.
 
-Resolve the Apex checkout from the task's repository mapping and isolation
-receipt. Verify its identity and read its applicable AGENTS.md. Do not guess a
-developer path or use an unrelated task's checkout. Apex hosts the existing
-protected release procedure for Apex, Fuse, Prime and coordinated releases.
+| Ref | Deploys |
+| --- | --- |
+| Integration branch (`poc`; Prime `main`) | Staging, automatically |
+| Tag `vX.0.0.N` | Demo automatically; Production through the manual `<APP>/PRODUCTION` job |
 
-Require and read these files from that verified checkout before any release action:
+Prime releases two applications, `HOUSTON` and `MYHUB`; treat each as its own
+release.
 
-- `.agents/legacy/README.md`
-- `.agents/legacy/sociuu-ship-hotfix/SKILL.md`
+The explicit request authorizes the steps below for the named fix and
+repositories. The release owner confirms each tag before it is pushed and runs
+the Production jobs; humans merge. A failed release needs a new explicit
+decision to roll back or roll forward.
 
-If either is missing, report that the selected Apex revision lacks the migrated
-release provider. Do not fall back to a similarly named global staging skill or
-reconstruct the release process. Select a compatible checkout through the task's
-normal isolation workflow before continuing.
+## Procedure
 
-Follow the protected procedure and its exact local references and scripts.
-Within it, legacy stage names resolve under `.agents/legacy/`; they are document
-references, not global skill invocations. Review, readiness and publication use
-their `references/protected-release.md` files. Production finalization uses
-`.agents/legacy/sociuu-finalize/SKILL.md`, never shared staging finalization.
+1. **Scope.** Identify the reviewed fix (MR or commits), its ClickUp task, and
+   every affected repository and application. Confirm its tests and review
+   passed.
+2. **Baseline.** For each application, find the tag of the last successful
+   `<APP>/PRODUCTION` job and confirm it against the running version. Filter by
+   job: Houston and MyHub share one `permanent/production` environment. If the
+   integration branch has nothing unreleased beyond that tag, stop and use an
+   ordinary release.
+3. **Branch.** In a task worktree, create `hotfix/<task-key>` from that tag and
+   apply only the fix. Keep conflict resolution minimal and run the
+   repository's focused tests.
+4. **Merge-back MR.** Open an MR from the hotfix branch to the integration
+   branch, noting any original MR it replaces.
+5. **Collisions.** Check that no other tag pipeline or Production deployment
+   is running, and ask the release owner to tell the team before tagging.
+6. **Tag.** Run `git fetch --tags` and push the next unused number from
+   `git tag -l 'v*.0.0.*' --sort=-v:refname` on the hotfix branch head; tags are
+   never moved or reused. Confirm the format with the release owner when a
+   repository has no `vX.0.0.N` tags yet (Admin uses `v3.2.x`). For several
+   repositories, release providers before consumers (Apex before Fuse and
+   Prime) unless the change requires another order.
+7. **Demo.** Wait for the Demo deployment and verify the fix and adjacent
+   behaviour on Demo. If Demo fails, stop before Production and report.
+8. **Production.** The release owner runs `<APP>/PRODUCTION`. Verify the
+   deployed tag, the fix and error monitoring before releasing the next
+   application.
+9. **Finish.** Ask the release owner to close the team notice. After the
+   merge-back MR is merged, close any superseded original MR, post a
+   release-note comment on the ClickUp task (tags, applications, user impact)
+   and set it to `complete`.
 
-Preserve running-Production baseline checks, release-owner acknowledgement,
-collision checks, exact tag authorization, Demo-before-Production verification,
-human-performed merge-back, and coordination-window closure. Respect any narrower
-action ceiling. Never infer rollback or destructive cleanup authority, weaken a
-failed guard, or perform a merge on the user's behalf.
-
-Return exact release identities, completed verification, remaining blockers and
-the human actions required. Do not claim deployment or finalization from local
-tests, a tag, or a merge alone.
+Report the exact tags, deployments, verification results, open MRs and any
+human action still required. A tag or a green pipeline alone is not a
+Production release.
