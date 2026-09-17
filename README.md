@@ -33,6 +33,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-ship | Explicit human merge handoff |
 | sociuu-ship-hotfix | Explicit Production scope; existing protected Apex provider |
 | sociuu-dock | Compatibility entrypoint to separately installed Dock owner |
+| sociuu-better-agent | Audit and progressively split a repository's AGENTS.md guidance |
 
 CE and selected Matt Pocock skills are optional engineering providers. Routine
 work does not require a full plugin lifecycle. Dock owns runtime/database state;
