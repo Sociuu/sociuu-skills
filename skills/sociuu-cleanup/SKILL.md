@@ -13,11 +13,21 @@ task's worktree, Dock environment or MR is reported, never touched.
 
 ## Sweep
 
-Build one table of findings from the workspace isolation inventory, the Dock
-environment list, the forge's open merge requests for the current user, and the
-task tracker's unfinished tasks. The inventory can take minutes; run it in the
+Build one table of findings from four places:
+
+```sh
+sociuu env list --json
+for r in apex fuse prime admin dock sociuu-gitops; do (cd ~/SOCIUU/$r && glab mr list --author=@me); done
+gh pr list --author @me -R Sociuu/sociuu-skills
+```
+
+plus the workspace isolation provider's `inventory --details`, whose path each
+installation resolves for itself. That inventory can take minutes; run it in the
 background and read each worktree's status, cleanliness, branch and age
 together. Age alone decides nothing.
+
+Then the task tracker: list the current user's unfinished tasks and compare each
+with its merge requests.
 
 For each finding, state what it is, which task owns it, and one of:
 
@@ -37,8 +47,10 @@ For each finding, state what it is, which task owns it, and one of:
    MRs with unresolved review threads, drafts nobody is finishing.
 4. **Task records**: merged work not in `done`, released work not in `complete`,
    tasks with no MR link, and discussed-but-never-created follow-ups.
-5. **Disk**, when Dock is short: reclaim inside the Docker VM first, then remove
-   environments one by one. Never a broad Docker prune.
+5. **Disk**, when Dock is short: reclaim inside the Docker VM first with
+   `colima ssh -- sudo fstrim -v /var/lib/docker`, which frees host space that
+   `docker system df` does not show, then remove environments one by one. Never
+   a broad Docker prune.
 
 ## Retention rules
 
