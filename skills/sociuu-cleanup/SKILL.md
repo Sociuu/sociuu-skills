@@ -13,18 +13,37 @@ task's worktree, Dock environment or MR is reported, never touched.
 
 ## Sweep
 
-Build one table of findings from four places:
+Start with local state, because it is what decides everything else:
 
 ```sh
 sociuu env list --json
-for r in apex fuse prime admin dock sociuu-gitops; do (cd ~/SOCIUU/$r && glab mr list --author=@me); done
-gh pr list --author @me -R Sociuu/sociuu-skills
 ```
 
 plus the workspace isolation provider's `inventory --details`, whose path each
 installation resolves for itself. That inventory can take minutes; run it in the
 background and read each worktree's status, cleanliness, branch and age
 together. Age alone decides nothing.
+
+### Merge requests: ask by branch, never by author
+
+Every agent commits through one shared forge account, so `--author=@me` returns
+the whole team's open work — dozens of merge requests in a busy repository, none
+of them attributable to this machine. Take each branch the inventory reported
+and ask the forge about that branch instead:
+
+```sh
+glab mr list --source-branch "$branch" --all
+```
+
+That pairing is what makes the sweep useful, because it exposes both directions:
+
+- a worktree whose merge request already **merged** — safe to release;
+- an open merge request whose worktree is **gone** — nothing local to clean, but
+  the review is still waiting on someone.
+
+For the second direction, list the repository's open merge requests whose source
+branch carries the agent branch prefix and subtract the branches the inventory
+knows about. The remainder is work this machine started and forgot.
 
 Then the task tracker: list the current user's unfinished tasks and compare each
 with its merge requests.
