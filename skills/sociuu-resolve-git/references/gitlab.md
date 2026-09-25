@@ -12,7 +12,8 @@ reply and resolution operations. Encode project paths and paginate to completion
    fix differently, explain already-fixed/declined items, or leave a material
    unresolved decision for the human with a recommendation.
 4. Make authorized fixes in the task-owned checkout with one suitable provider.
-   Run affected checks and the required review gate, commit/push within scope and verify that
+   Run affected checks and any review the repository and developer instructions
+   require, commit/push within scope and verify that
    the MR's remote source contains the fix.
 5. Reply with disposition, evidence and tested revision. Search existing replies
    first to avoid duplicate posts on retries. Resolve eligible threads only

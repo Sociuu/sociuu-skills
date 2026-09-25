@@ -23,14 +23,12 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | to-mockup | Fuse or Prime task worktree and Dock; ClickUp for an approved implementation handoff |
 | sociuu-task | ClickUp; implementation records and meaningful updates |
 | sociuu-investigate | Read-only repository/tenant evidence; ambiguous reports |
-| sociuu-verify | Product checks; select and reconcile acceptance evidence |
 | sociuu-qa-guide | Exact Dock environment; economical human checks |
 | sociuu-before-and-after | Authorized prod_read measurement; numeric changes |
 | sociuu-explain | Plain-language Sociuu explanations and summaries |
 | sociuu-recap | Concise latest-work and task-history recaps |
 | sociuu-resolve-git | Forge tools; authorized existing-feedback handling |
 | sociuu-aq | Explicit request or accepted recommendation; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
-| sociuu-finalize | Authorized post-staging reconciliation and cleanup |
 | sociuu-cleanup | Authorized removal of worktrees and Dock environments; forge and task-tracker access |
 | sociuu-ship | Explicit merge handoff; agent merges only under its merge grant |
 | sociuu-ship-hotfix | Explicit Production scope; forge, CI and release-owner access |

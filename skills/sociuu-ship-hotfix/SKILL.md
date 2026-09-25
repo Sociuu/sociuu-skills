@@ -1,6 +1,6 @@
 ---
 name: sociuu-ship-hotfix
-description: Release a reviewed fix to Sociuu Production on top of the version running there, for Apex, Fuse, Prime (Houston, MyHub) or Admin. Use only on an explicit Production hotfix request; ordinary releases go through staging with sociuu-ship and sociuu-finalize.
+description: Release a reviewed fix to Sociuu Production on top of the version running there, for Apex, Fuse, Prime (Houston, MyHub) or Admin. Use only on an explicit Production hotfix request; ordinary releases go through staging with sociuu-ship.
 disable-model-invocation: true
 ---
 
