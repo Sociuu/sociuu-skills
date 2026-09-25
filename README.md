@@ -31,14 +31,15 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | sociuu-aq | Explicit request or accepted recommendation; Dock, Apex Scaffolding, CE Dogfood, agent-browser |
 | sociuu-finalize | Authorized post-staging reconciliation and cleanup |
 | sociuu-cleanup | Authorized removal of worktrees and Dock environments; forge and task-tracker access |
-| sociuu-ship | Explicit human merge handoff |
+| sociuu-ship | Explicit merge handoff; agent merges only under its merge grant |
 | sociuu-ship-hotfix | Explicit Production scope; forge, CI and release-owner access |
 | sociuu-dock | Compatibility entrypoint to separately installed Dock owner |
 | sociuu-better-agent | Audit and progressively split a repository's AGENTS.md guidance |
 
 CE and selected Matt Pocock skills are optional engineering providers. Routine
 work does not require a full plugin lifecycle. Dock owns runtime/database state;
-Apex owns synthetic Scaffolding; humans own merge/deployment. Install tools through
+Apex owns synthetic Scaffolding; humans own deployment, and merge unless
+sociuu-ship's merge grant holds. Install tools through
 their owning setup workflows. Installation grants no access or runtime authority.
 Hosts without filesystem/tools cannot execute local procedures and must say so.
 
