@@ -20,6 +20,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 
 | Skill | Needs / trigger |
 | --- | --- |
+| to-mockup | Fuse or Prime task worktree and Dock; ClickUp for an approved implementation handoff |
 | sociuu-task | ClickUp; implementation records and meaningful updates |
 | sociuu-investigate | Read-only repository/tenant evidence; ambiguous reports |
 | sociuu-verify | Product checks; select and reconcile acceptance evidence |
