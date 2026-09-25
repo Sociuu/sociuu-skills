@@ -18,7 +18,11 @@ existing separate records; do not migrate just for presentation.
 - Verification: commands/checks, expected and actual outcomes, tested revision
   and environment, report links, limitations.
 - Release/follow-through: staging evidence, release-note text, cleanup,
-  communication handoffs and remaining owners.
+  communication handoffs and remaining owners. After merge, keep this section
+  and the task status current: set the list's verified DONE status only once
+  staging proof passes, post one release-note comment (user impact, MRs,
+  evidence), and never mark COMPLETE from staging evidence alone. The
+  developer's own instructions decide when this runs.
 
 Maintain a readable current summary plus dated consequential updates.
 Do not paste raw tool logs, secrets, customer rows or full chat transcripts.
@@ -50,7 +54,7 @@ checking results and pair visible UI with an independent API or persisted-state
 check where relevant. A changed value alone is not proof of correctness.
 Distinguish live integration evidence from mocked/component/route-smoke results.
 Reuse valid evidence after fixes; refresh checks affected by the change and its
-dependencies. `sociuu-verify` selects the evidence;
+dependencies. The repository and developer instructions select the evidence;
 do not add another provider's whole lifecycle to an already-proven lane.
 
 ## Multi-repository and milestones
