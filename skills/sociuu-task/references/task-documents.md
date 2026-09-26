@@ -39,6 +39,25 @@ Do not paste raw tool logs, secrets, customer rows or full chat transcripts.
 - Automated/operational verification where browser/human QA is not useful.
 - Exclusions, limitations and required external/human verification.
 
+Keep one compact verification receipt in the QA Runbook, updated from actual
+results. For each acceptance criterion, record its status and the lane that
+proves it. Link reports when they exist instead of pasting raw logs. The receipt
+identifies:
+
+- Each changed repository's name, exact source SHA and task worktree; for live
+  checks, the Dock environment and binding to every changed application checkout.
+- Each required check's command, repository revision(s) exercised, environment
+  where relevant, and result (including counts when available). Include a
+  report or CI artifact URL when one exists; distinguish local, fixture, live,
+  sandbox and human evidence. Mark a missing check pending or blocked with its
+  reason.
+- The independent review result and disposition of findings, full-suite gate
+  result on the commit to push, and the pushed SHA's CI pipeline and status.
+- Remaining risks, waivers and the next human action. After a code change,
+  refresh only the evidence that change invalidates, subject to the workspace
+  full-suite rule. Never transfer a pass from a different SHA or environment
+  without stating why it still applies.
+
 For a background job or cache change, explicitly consider consumer-visible
 effects before declaring browser QA inapplicable. A documentation-only task may
 use link, packaging and instruction-behavior checks instead of product-browser QA.
