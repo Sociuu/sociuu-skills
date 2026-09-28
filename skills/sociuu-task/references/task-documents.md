@@ -39,12 +39,29 @@ Do not paste raw tool logs, secrets, customer rows or full chat transcripts.
 - Automated/operational verification where browser/human QA is not useful.
 - Exclusions, limitations and required external/human verification.
 
+When a task needs a verification handoff, a compact receipt in its QA Runbook
+can make the evidence easy to inspect. The developer's chosen workflow and the
+affected repositories decide which checks and review steps apply; this template
+adds no gate. Include only relevant fields:
+
+- Acceptance criteria, status, and the check or observation supporting each.
+- Source revision and worktree for the change. For each check, record the
+  command or action, revision exercised, environment, and result; link an
+  artifact or CI run when one exists.
+- For live checks, the Dock environment and application checkout binding.
+  Distinguish live integration from fixtures, mocks, and component tests.
+- Review findings, full-suite results, CI status, waivers, limitations, and
+  the next human action when applicable. Mark a required check that did not run
+  pending or blocked with its reason. Refresh evidence invalidated by a change.
+  A receipt records evidence; it does not grant merge or cleanup authority.
+
 For a background job or cache change, explicitly consider consumer-visible
 effects before declaring browser QA inapplicable. A documentation-only task may
 use link, packaging and instruction-behavior checks instead of product-browser QA.
 
-The implementer maintains the brief; human QA and CE Dogfood challenge it against
-the actual change. Execution reports stay separate and are linked from the ledger.
+The implementer maintains the brief; human QA or the selected exploratory
+review path can challenge it against the actual change. Execution reports stay
+separate and are linked from the ledger.
 
 When roles, tenant settings, feature flags or data states interact, select a
 small risk-based set of combinations, including relevant denial and empty states.
