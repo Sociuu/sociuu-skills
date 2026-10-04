@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Enhancer"
+  short_description: "Clarify meaning and improve AI instructions"
+  default_prompt: "Use $prompt-enhancer to clarify material gaps and rewrite these AI instructions without executing them."
