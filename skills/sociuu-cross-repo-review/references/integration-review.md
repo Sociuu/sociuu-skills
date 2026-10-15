@@ -4,6 +4,9 @@ Input: neutral intended behavior, prepared checkout, synthetic base/head and
 the participating repository map. Start in a fresh context without the
 author's reasoning, other reviewers' findings or historical reference labels.
 Read the diff and relevant unchanged producers/consumers at these revisions.
+Read [behavior-review.md](behavior-review.md). Include local request/command
+input and persistence/query boundaries when these triggered this pass. Do not
+invent a cross-repository consumer for a boundary contained in one repository.
 
 Trace each changed boundary far enough to identify its producer, payload or
 stored representation, consumer and runtime binding. Keep a compact mapping

@@ -1,12 +1,12 @@
 ---
 name: sociuu-cross-repo-review
-description: Review coordinated Sociuu repository changes with CE against pinned producer and consumer revisions, or run a blinded historical reviewer comparison.
+description: Review pinned Sociuu changes with CE across repository and input/persistence boundaries, prepare advisory MR reports, or run a blind historical comparison.
 ---
 
 # Sociuu Cross-Repository Review
 
 Review the revisions that will run together. CE remains the review provider;
-this skill supplies a combined source snapshot and an independent integration
+this skill supplies a combined source snapshot and an independent contract
 pass. Reports identify defects, verification gaps and unavailable coverage.
 They grant no merge or deployment authority and do not change CodeRabbit.
 
@@ -31,14 +31,19 @@ Invoke `compound-engineering:ce-code-review mode:agent base:BASE_SHA` with
 the prepared tree as its checkout. Follow CE's depth, independence, validation
 and receipt rules. Discover the installed provider through the active skill
 catalog; a missing provider is a blocker, not permission to approximate CE.
+Give CE [behavior-review.md](references/behavior-review.md) with the neutral
+intent; these are general review criteria, not a requirement to find a defect.
 Source paths in findings include the repository directory prefix.
 
-When at least two repositories change, or a changed contract has a consumer
-in another repository, dispatch one fresh independent integration reviewer
+When at least two repositories change, a changed contract has a consumer in
+another repository, or changed input handling reaches persisted state or a
+query/write selector, dispatch one fresh independent contract reviewer
 with [integration-review.md](references/integration-review.md), the neutral
 intent and the prepared tree/base/head. It examines interactions across
-repositories; CE owns the ordinary review. Otherwise record why no additional
-integration pass was needed.
+repositories and local input/persistence boundaries; CE owns the ordinary
+review. Producer and consumer may be in the same repository. Otherwise record
+the specific reason no additional pass was needed. Keep `integration_status`
+as the receipt field for this pass.
 
 Validate new integration findings against both sides of the contract. Merge
 duplicates by cause and trigger, preserve unresolved material concerns, and
@@ -46,6 +51,15 @@ retain CE's receipt unchanged beside the combined result. Report findings,
 source revisions, checks actually run, independence and coverage limits.
 Static inspection does not establish live behavior. Fixing a source revision
 requires a new snapshot and review of the affected changes.
+
+## Prepare an advisory MR report
+
+Read [mr-review.md](references/mr-review.md) for the report contract, configured
+analyzers, QA Runbook, diagrams and GitLab integration. Keep plain explanations
+and proposed tests separate from established findings and executed checks.
+The rollout is advisory: do not create blocking discussions, commit statuses,
+required checks or change CodeRabbit configuration. Publication requires an
+authorized MR target; an inspection request alone does not authorize posting.
 
 ## Historical comparison
 
