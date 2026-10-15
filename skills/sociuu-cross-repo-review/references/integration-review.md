@@ -28,6 +28,13 @@ of the source paths examined. Concentrate on consequences:
 These are review prompts, not automatic findings. Establish an affected caller
 and a causal failure path. Prefer consequential problems over rewrites or
 style preferences. Do not require a finding from an adequate change.
+For edited persistence branches that rebuild optional values, return an
+`optional_field_matrix` with field/group, saved input, omitted and explicit-clear
+results, caller evidence and base/head attribution. Empty is valid only with a
+specific not-applicable reason. Include affected pre-existing failures separately
+from new regressions, labelled in their titles and evidence; ambiguous intent
+is an unresolved verification gap, not a confirmed defect. Preserve CE's own
+regression-only disposition rather than rewriting its raw receipt.
 
 Return JSON with `status` (`complete`, `degraded`, `failed`), `findings`,
 `scope` (`base` and `head_sha`), `contracts_examined`, `checks_run` and

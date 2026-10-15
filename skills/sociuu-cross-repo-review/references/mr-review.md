@@ -20,6 +20,11 @@ correction and validation status. Explain what to change and why, then how to
 prove the correction. Distinguish confirmed defects, unverified concerns and
 verification gaps. Do not bury an unavailable review under a clean verdict.
 Summaries, diagrams and polished prose do not establish review accuracy.
+When the contract pass examined optional persisted values, summarize its
+presence/clear matrix in the walkthrough or checks, including any unresolved
+operation semantics. Label retained existing behavior explicitly and explain
+whether it was introduced, extended or merely remains in the edited boundary.
+An existing issue is not evidence of a newly introduced regression.
 
 ## Checks and documentation
 
