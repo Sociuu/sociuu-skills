@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sociuu Cross-Repository Review"
+  short_description: "Review coordinated changes across Sociuu repositories"
+  default_prompt: "Use $sociuu-cross-repo-review to review these pinned repository changes together with CE."

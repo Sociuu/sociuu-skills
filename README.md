@@ -24,6 +24,7 @@ stay outside this team package. Managed plugin caches are not edit targets.
 | to-mockup | Fuse or Prime task worktree and Dock; ClickUp for an approved implementation handoff |
 | sociuu-task | ClickUp; implementation records and meaningful updates |
 | sociuu-investigate | Read-only repository/tenant evidence; ambiguous reports |
+| sociuu-cross-repo-review | CE; pinned changes and consumers across repositories, or blinded historical review comparison |
 | sociuu-qa-guide | Exact Dock environment; economical human checks |
 | sociuu-before-and-after | Authorized prod_read measurement; numeric changes |
 | sociuu-explain | Plain-language Sociuu explanations and summaries |
