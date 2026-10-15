@@ -24,6 +24,11 @@ documents outside their view. Original Git history and remotes are withheld.
 Read the preparation receipt's exclusions; retained source instructions can
 still contain prior knowledge, so disclose that limitation.
 
+Keep reference labels outside source repositories. Product benchmarks, label
+fields and expected test fixtures are legitimate review inputs: do not remove
+them by guessing from their filenames. The blind helper suppresses known
+review-metadata directories and CodeRabbit configuration, not those names.
+
 ## Freeze before review
 
 Register the candidate files, review configuration and packet list with:
@@ -39,6 +44,10 @@ supplies an opaque SHA256 digest of the final reference file before review;
 its contents remain withheld. Registration
 records their hashes and each packet's tracked Git tree. An existing run is
 immutable; a changed candidate starts a new run.
+
+Use private versioned copies of candidate and provider assets for the run.
+A managed plugin cache can update during review even when its directory's
+version label stays unchanged; a version label alone does not freeze bytes.
 
 Use fresh reviewer contexts with only the frozen candidate, generic review
 instructions and the assigned packet. The coordinator may know old findings;

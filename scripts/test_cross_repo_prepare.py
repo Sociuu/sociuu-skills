@@ -113,6 +113,26 @@ class PrepareTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((a / 'new-output').exists())
 
+    def test_blind_preserves_product_benchmarks_labels_and_expected_fixtures(self):
+        source = {'app/Benchmark/Report.php': 'old report\n',
+                  'src/label.ts': 'old label\n',
+                  'tests/expected.json': '{"value": 1}\n',
+                  'contracts/derive_expected.py': 'expected = 1\n',
+                  'docs/tasks/expected-findings.md': 'private review answers\n'}
+        changes = {path: content.replace('old', 'new').replace('1', '2')
+                   for path, content in source.items()}
+        a, a0, a1 = self.repo('a', source, changes)
+        result, _ = self.prepare([self.entry('a', a, a0, a1)], blind=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        tree = Path(payload['tree'])
+        for path, content in changes.items():
+            if path.startswith('docs/tasks/'):
+                self.assertFalse((tree / 'a' / path).exists())
+            else:
+                self.assertEqual((tree / 'a' / path).read_text(), content)
+                self.assertEqual(git(tree, 'show', f"{payload['base']}:a/{path}"), source[path].strip())
+
     def test_rejects_escaping_symlink_without_partial_output(self):
         a, a0, _ = self.repo('a', {'safe': 'content'}, {'safe': 'new'})
         os.symlink('../../outside', a / 'escape')

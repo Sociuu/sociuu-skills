@@ -15,7 +15,6 @@ import tempfile
 
 
 NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]*\Z')
-ANSWER = re.compile(r'(^|[._-])(expected|answer|label|benchmark)([._-]|$)', re.I)
 EXCLUDED_DIRS = {'notes', 'outputs', 'audits', 'private', 'evidence', 'runs'}
 EXCLUDED_DOCS = {'tasks', 'plans', 'implement', 'knowledge', 'solutions'}
 
@@ -48,7 +47,7 @@ def excluded(path, blind):
         return True
     if len(parts) >= 2 and parts[0] == 'docs' and parts[1] in EXCLUDED_DOCS:
         return True
-    if parts[-1] == '.coderabbit.yaml' or ANSWER.search(parts[-1]):
+    if parts[-1] == '.coderabbit.yaml':
         return True
     return False
 
