@@ -43,9 +43,10 @@ def excluded(path, blind):
         return True
     if not blind:
         return False
-    if '.doc' in parts or any(part in EXCLUDED_DIRS for part in parts):
+    if '.doc' in parts or parts[0] in EXCLUDED_DIRS:
         return True
-    if len(parts) >= 2 and parts[0] == 'docs' and parts[1] in EXCLUDED_DOCS:
+    if len(parts) >= 2 and parts[0] == 'docs' and (
+            parts[1] in EXCLUDED_DOCS or any(part in EXCLUDED_DIRS for part in parts[1:])):
         return True
     if parts[-1] == '.coderabbit.yaml':
         return True

@@ -133,6 +133,24 @@ class PrepareTests(unittest.TestCase):
                 self.assertEqual((tree / 'a' / path).read_text(), content)
                 self.assertEqual(git(tree, 'show', f"{payload['base']}:a/{path}"), source[path].strip())
 
+    def test_blind_metadata_directory_names_do_not_hide_application_source(self):
+        source = {f'src/{name}/module.py': 'value = 1\n'
+                  for name in ('notes', 'private', 'evidence', 'runs', 'outputs', 'audits')}
+        source.update({'private/reference.json': 'hidden reference\n',
+                       'docs/testing/evidence/reference.json': 'hidden evidence\n'})
+        changes = {path: content.replace('1', '2') for path, content in source.items()}
+        a, a0, a1 = self.repo('a', source, changes)
+        result, _ = self.prepare([self.entry('a', a, a0, a1)], blind=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        tree = Path(payload['tree'])
+        for path, content in changes.items():
+            if path.startswith('src/'):
+                self.assertEqual((tree / 'a' / path).read_text(), content)
+                self.assertEqual(git(tree, 'show', f"{payload['base']}:a/{path}"), source[path].strip())
+            else:
+                self.assertFalse((tree / 'a' / path).exists())
+
     def test_rejects_escaping_symlink_without_partial_output(self):
         a, a0, _ = self.repo('a', {'safe': 'content'}, {'safe': 'new'})
         os.symlink('../../outside', a / 'escape')

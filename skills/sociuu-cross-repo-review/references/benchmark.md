@@ -27,7 +27,9 @@ still contain prior knowledge, so disclose that limitation.
 Keep reference labels outside source repositories. Product benchmarks, label
 fields and expected test fixtures are legitimate review inputs: do not remove
 them by guessing from their filenames. The blind helper suppresses known
-review-metadata directories and CodeRabbit configuration, not those names.
+repository-level/documentation metadata directories, `.doc` directories and
+CodeRabbit configuration. Application directories named `notes`, `private`,
+`evidence` or `runs` remain source inputs.
 
 ## Freeze before review
 
