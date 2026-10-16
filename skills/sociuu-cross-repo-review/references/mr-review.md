@@ -14,6 +14,13 @@ the concrete problem, what changes and what a user/operator will experience.
 Use short sentences, define unfamiliar terms, and group the walkthrough by
 behavior rather than one sentence per file. Do not paste commit messages as
 the explanation. Retain exact source revisions and raw CE/contract receipts.
+New dossiers use version 2 and declare source-evidenced `contract_review`
+applicability. A complete contract pass carries the boundary and credential
+inventories described in [integration-review.md](integration-review.md); the
+rendered dossier shows both. Historical version 1 reports can be previewed;
+known material holds retain hold status, and otherwise the recommendation is
+incomplete. Explicit GitLab publication requires
+version 2.
 
 Each finding has severity, trigger, consequence, source evidence, suggested
 correction and validation status. Explain what to change and why, then how to
@@ -25,6 +32,14 @@ presence/clear matrix in the walkthrough or checks, including any unresolved
 operation semantics. Label retained existing behavior explicitly and explain
 whether it was introduced, extended or merely remains in the edited boundary.
 An existing issue is not evidence of a newly introduced regression.
+
+Use the contract pass's boundary inventory and credential policy matrix when
+applicable, including retained branches and unassessed destinations. Apply
+[behavior-review.md](behavior-review.md)'s severity criteria after combining
+findings. Explain supported impact, preconditions and recovery in the existing
+finding/disposition evidence. Keep original CE/contract ratings visible when
+reclassified. Verification gaps, low-value effects and unresolved consequences
+remain distinct; a lower severity is not evidence that a missing check passed.
 
 ## Checks and documentation
 

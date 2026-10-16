@@ -19,7 +19,7 @@ SHA_A, SHA_B, SHA_C = 'a' * 40, 'b' * 40, 'c' * 40
 def fixture():
     scope = {'base': SHA_A, 'head_sha': SHA_B}
     report = {
-        'version': 1, 'status': 'complete', 'source_scope': scope,
+        'version': 2, 'status': 'complete', 'source_scope': scope,
         'repositories': [{'name': 'apex', 'base': SHA_A, 'head': SHA_B, 'role': 'change'}],
         'intent': 'Expose the new value.',
         'summary': {'problem': 'Old value shown.', 'change': 'Read the new value.', 'effect': 'New value visible.'},
@@ -32,7 +32,9 @@ def fixture():
                        'negative_cases': [{'action': 'Open /values without access', 'expected': '403', 'evidence_to_capture': 'Response'}],
                        'cleanup': ['Delete synthetic tenant.'], 'execution_status': 'proposed', 'results': []},
         'diagrams': [], 'diagram_notes': {'sequence': 'No interaction change.', 'dbml': 'No schema change.'},
-        'coverage_limits': [], 'integration_status': 'not_applicable', 'integration_skip_reason': 'One changed repository.'}
+        'coverage_limits': [], 'integration_status': 'not_applicable', 'integration_skip_reason': 'Only value presentation changes.',
+        'contract_review': {'required': False, 'reason': 'The source changes value presentation without a contract boundary.',
+                            'evidence': ['src/value.py:8 display-only branch']}}
     ce = {'scope': scope, 'status': 'complete', 'reviewers': ['source reviewer'],
           'coverage': {'depth': 'focused'}, 'findings': []}
     return report, ce
@@ -43,7 +45,124 @@ def manifest():
             'repositories': [{'name': 'apex', 'base': SHA_A, 'head': SHA_B, 'role': 'change'}]}
 
 
+def integration_fixture(scope):
+    return {'scope': scope.copy(), 'status': 'complete', 'findings': [],
+            'boundary_checks': {'rows': [{'input_branch': 'Request value', 'validation_transformation': 'Read value',
+                                          'destination': 'Response', 'observed_result': 'New value is returned',
+                                          'evidence': ['src/value.py:8 branch'],
+                                          'base_head_attribution': 'base: old value; head: new value'}]},
+            'credential_policy_matrix': {'rows': [],
+                                         'not_applicable_reason': 'The edited value flow does not carry credentials.',
+                                         'not_applicable_evidence': ['src/value.py:8 input and response']}}
+
+
 class ReportTests(unittest.TestCase):
+    def test_legacy_v1_preserves_known_hold_precedence(self):
+        report, ce = fixture()
+        report['version'] = 1
+        report['checks'][0]['status'] = 'fail'
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'hold')
+        report['checks'][0]['status'] = 'pass'
+        report['findings'] = [{'id': 'F1', 'title': 'Wrong tenant', 'severity': 'P1', 'repository': 'apex',
+                               'path': 'src/value.py', 'line': 8, 'trigger': 'Cross tenant request',
+                               'consequence': 'Data leak', 'evidence': ['src/value.py:8'],
+                               'suggested_correction': 'Scope the query', 'validation_status': 'confirmed',
+                               'materiality': 'consequential', 'origin': 'CE'}]
+        ce['findings'] = [{'#': 1, 'title': 'Wrong tenant', 'severity': 'P1'}]
+        report['finding_dispositions'] = [{'stage': 'ce', 'source_id': '1', 'action': 'retained',
+                                           'finding_id': 'F1', 'reason': 'Same source defect', 'evidence': []}]
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'hold')
+
+    def test_optional_contract_review_can_be_run_or_report_failure(self):
+        report, ce = fixture()
+        report['integration_status'] = 'complete'
+        report.pop('integration_skip_reason')
+        integration = integration_fixture(report['source_scope'])
+        self.assertEqual(module.recommendation(report, ce, integration, manifest())['status'], 'pass')
+        report['status'] = 'degraded'
+        report['integration_status'] = 'failed'
+        report['coverage_limits'] = ['Optional contract reviewer could not start.']
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'incomplete')
+
+    def test_degraded_report_validates_claimed_complete_integration_coverage(self):
+        report, ce = fixture()
+        report['status'] = 'degraded'
+        report['coverage_limits'] = ['Independent CE follow-up unavailable.']
+        report['integration_status'] = 'complete'
+        report.pop('integration_skip_reason')
+        integration = integration_fixture(report['source_scope'])
+        self.assertIn('Request value', module.render_report(report, ce, integration, manifest()))
+        for bad in ({**integration, 'boundary_checks': {'rows': [{'input_branch': 'Request value'}]}},
+                    {**integration, 'credential_policy_matrix': None},
+                    {**integration, 'scope': {'base': SHA_A, 'head_sha': SHA_C}}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                module.render_report(report, ce, bad, manifest())
+
+    def test_declared_required_single_repo_contract_cannot_skip(self):
+        report, ce = fixture()
+        report['contract_review'] = {'required': True, 'reason': 'Return URL credentials changed.',
+                                     'evidence': ['src/value.py:8 return URL branch']}
+        with self.assertRaisesRegex(ValueError, 'required contract review'):
+            module.render_report(report, ce, manifest_lock=manifest())
+        report['integration_status'] = 'complete'
+        report.pop('integration_skip_reason')
+        integration = integration_fixture(report['source_scope'])
+        integration['credential_policy_matrix'] = {'rows': [{
+            'representation': 'URL fragment', 'source': 'Return URL', 'transformation': 'Removed before logging',
+            'destination': 'Browser callback', 'policy': 'Credentials stay out of logs',
+            'observed_result': 'Fragment is absent from log input', 'evidence': ['src/value.py:8 callback'],
+            'base_head_attribution': 'base: logged; head: removed'}]}
+        self.assertEqual(module.recommendation(report, ce, integration, manifest())['status'], 'pass')
+        rendered = module.render_report(report, ce, integration, manifest())
+        self.assertIn('URL fragment', rendered)
+        self.assertIn('Request value', rendered)
+
+    def test_v2_requires_evidenced_applicability(self):
+        report, ce = fixture()
+        for value in (None, {'required': False, 'reason': 'Presentation only.', 'evidence': []},
+                      {'required': 'false', 'reason': 'Presentation only.', 'evidence': ['src/value.py:8']}):
+            bad = copy.deepcopy(report)
+            if value is None:
+                bad.pop('contract_review')
+            else:
+                bad['contract_review'] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                module.render_report(bad, ce, manifest_lock=manifest())
+
+    def test_complete_contract_receipt_requires_coverage_or_specific_nonapplicability(self):
+        report, ce = fixture()
+        report['integration_status'] = 'complete'
+        report.pop('integration_skip_reason')
+        report['contract_review']['required'] = True
+        integration = integration_fixture(report['source_scope'])
+        for name in ('boundary_checks', 'credential_policy_matrix'):
+            bad = copy.deepcopy(integration)
+            bad.pop(name)
+            with self.subTest(name=name, case='missing'), self.assertRaises(ValueError):
+                module.render_report(report, ce, bad, manifest())
+            bad = copy.deepcopy(integration)
+            bad[name] = {'rows': []}
+            with self.subTest(name=name, case='unexplained-empty'), self.assertRaises(ValueError):
+                module.render_report(report, ce, bad, manifest())
+            bad = copy.deepcopy(integration)
+            bad[name] = {'rows': [{'evidence': ['src/value.py:8']}]}
+            with self.subTest(name=name, case='malformed-row'), self.assertRaises(ValueError):
+                module.render_report(report, ce, bad, manifest())
+        integration['boundary_checks'] = {'rows': [], 'not_applicable_reason': 'No edited entry point receives an input.',
+                                          'not_applicable_evidence': ['src/value.py:8 constant source']}
+        self.assertEqual(module.recommendation(report, ce, integration, manifest())['status'], 'pass')
+        self.assertIn('No edited entry point', module.render_report(report, ce, integration, manifest()))
+
+    def test_legacy_v1_renders_incomplete_for_old_false_clean_shapes(self):
+        report, ce = fixture()
+        report['version'] = 1
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'incomplete')
+        report['integration_status'] = 'complete'
+        report.pop('integration_skip_reason')
+        integration = {'scope': report['source_scope'], 'status': 'complete', 'findings': []}
+        self.assertEqual(module.recommendation(report, ce, integration, manifest())['status'], 'incomplete')
+        self.assertIn('Legacy v1', module.render_report(report, ce, integration, manifest()))
+
     def test_two_changes_cannot_skip_independent_contract_review(self):
         report, ce = fixture()
         report['repositories'].append({'name': 'prime', 'base': SHA_A, 'head': SHA_B, 'role': 'change'})
@@ -90,8 +209,10 @@ class ReportTests(unittest.TestCase):
     def test_integration_findings_cannot_be_omitted_and_dedup_keeps_both_sources(self):
         report, ce = fixture()
         report['integration_status'] = 'complete'
-        integration = {'scope': report['source_scope'].copy(), 'status': 'complete',
-                       'findings': [{'id': 'INT-1', 'title': 'Wrong value', 'severity': 'P1'}]}
+        report['contract_review'] = {'required': True, 'reason': 'A changed input branch reaches a consumer.',
+                                     'evidence': ['src/value.py:8 request branch']}
+        integration = integration_fixture(report['source_scope'])
+        integration['findings'] = [{'id': 'INT-1', 'title': 'Wrong value', 'severity': 'P1'}]
         with self.assertRaisesRegex(ValueError, 'disposition accounting'):
             module.render_report(report, ce, integration, manifest())
         ce['findings'] = [{'#': 1, 'title': 'Wrong value', 'severity': 'P1'}]
@@ -177,9 +298,10 @@ class ReportTests(unittest.TestCase):
                 module.render_report(report, bad, manifest_lock=manifest())
         report['integration_status'] = 'complete'
         report.pop('integration_skip_reason')
+        report['contract_review']['required'] = True
         with self.assertRaises(ValueError):
             module.render_report(report, ce, manifest_lock=manifest())
-        integration = {'scope': report['source_scope'], 'status': 'complete', 'findings': []}
+        integration = integration_fixture(report['source_scope'])
         self.assertIn('pass', module.render_report(report, ce, integration, manifest()))
         integration['scope'] = {'base': SHA_A, 'head_sha': SHA_C}
         with self.assertRaises(ValueError):

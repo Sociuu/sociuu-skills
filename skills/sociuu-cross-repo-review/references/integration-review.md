@@ -8,7 +8,8 @@ Read [behavior-review.md](behavior-review.md). Include local request/command
 input and persistence/query boundaries when these triggered this pass. Do not
 invent a cross-repository consumer for a boundary contained in one repository.
 
-Trace each changed boundary far enough to identify its producer, payload or
+Trace each edited entry point and its retained input branches far enough to
+identify its producer, payload or
 stored representation, consumer and runtime binding. Keep a compact mapping
 of the source paths examined. Concentrate on consequences:
 
@@ -25,6 +26,20 @@ of the source paths examined. Concentrate on consequences:
   fixtures. Identify a concrete incorrect producer result that the test would
   still accept before reporting a verification gap.
 
+Return a compact `boundary_checks` inventory as `{rows:[...]}` for the examined entry points.
+Each row has `input_branch`, `validation_transformation`, `destination`,
+`observed_result`, `evidence` (nonempty source list) and `base_head_attribution`,
+all nonempty. Account for retained
+branches that feed the edited operation even when CE excludes an existing
+problem from its regression result. For credential-handling changes, also
+return `credential_policy_matrix` as `{rows:[...]}`. Each row has nonempty
+`representation`, `source`, `transformation`, `destination`, `policy`,
+`observed_result`, `evidence` (nonempty source list) and `base_head_attribution`.
+Use `{rows:[], not_applicable_reason:string, not_applicable_evidence:[string]}`
+for either inventory only when its boundary or credential flow is absent;
+give a specific reason and nonempty source evidence. Follow the representations
+and policy questions in behavior-review.md.
+
 These are review prompts, not automatic findings. Establish an affected caller
 and a causal failure path. Prefer consequential problems over rewrites or
 style preferences. Do not require a finding from an adequate change.
@@ -38,9 +53,13 @@ regression-only disposition rather than rewriting its raw receipt.
 
 Return JSON with `status` (`complete`, `degraded`, `failed`), `findings`,
 `scope` (`base` and `head_sha`), `contracts_examined`, `checks_run` and
-`coverage_limits`. Each finding includes
-an ID, title, severity, source file/line, producer and consumer file pointers,
-trigger, consequence, evidence and suggested correction. Mark speculative
+`coverage_limits`. Include both coverage inventories above in every complete receipt.
+Each finding includes
+an ID, title, severity (`P0`, `P1`, `P2` or `P3`), source file/line, producer and
+consumer file pointers, trigger, consequence, evidence and suggested correction.
+Include `severity_rationale` stating supported impact, required preconditions
+and recovery, and `validation_status` (`confirmed` or `unresolved`). Apply the
+severity and finding-type criteria in behavior-review.md. Mark speculative
 reachability or missing source explicitly. An unavailable consumer makes
 that contract unassessed; it is not evidence of compatibility.
 

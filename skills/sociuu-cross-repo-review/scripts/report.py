@@ -60,6 +60,34 @@ def receipt_scope(receipt, scope, label):
     require(receipt['status'] == 'complete', f'{label} is not complete')
 
 
+def coverage_inventory(receipt, name, fields):
+    inventory = obj(receipt.get(name), ('rows',), name)
+    rows = inventory['rows']
+    require(isinstance(rows, list), f'{name} rows must be a list')
+    if rows:
+        for row in rows:
+            obj(row, (*fields, 'evidence', 'base_head_attribution'), name + ' row')
+            for field in fields + ('base_head_attribution',):
+                string(row[field], name + ' ' + field)
+            strings(row['evidence'], name + ' evidence', True)
+        require('not_applicable_reason' not in inventory and 'not_applicable_evidence' not in inventory,
+                f'{name} cannot have rows and a not-applicable claim')
+    else:
+        string(inventory.get('not_applicable_reason'), name + ' not-applicable reason')
+        strings(inventory.get('not_applicable_evidence'), name + ' not-applicable evidence', True)
+
+
+def contract_review_applicability(report, changes):
+    review = obj(report.get('contract_review'), ('required', 'reason', 'evidence'), 'contract review applicability')
+    require(type(review['required']) is bool, 'contract review required must be boolean')
+    string(review['reason'], 'contract review applicability reason')
+    strings(review['evidence'], 'contract review applicability evidence', True)
+    require(changes < 2 or review['required'], 'multiple changed repositories require independent contract review')
+    if review['required']:
+        require(report['integration_status'] != 'not_applicable',
+                'required contract review cannot be declared inapplicable')
+
+
 def manifest_scope(report, manifest_lock):
     obj(manifest_lock, ('version', 'composite', 'repositories'), 'snapshot receipt')
     require(type(manifest_lock['version']) is int and manifest_lock['version'] == 1,
@@ -142,7 +170,7 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
     obj(report, ('version', 'status', 'source_scope', 'repositories', 'intent', 'summary',
                  'walkthrough', 'findings', 'checks', 'qa_runbook', 'diagrams', 'diagram_notes',
                  'coverage_limits', 'integration_status', 'finding_dispositions'), 'report')
-    require(type(report['version']) is int and report['version'] == 1, 'unsupported report version')
+    require(type(report['version']) is int and report['version'] in (1, 2), 'unsupported report version')
     choice(report['status'], ('complete', 'degraded', 'failed'), 'report status')
     scope = obj(report['source_scope'], ('base', 'head_sha'), 'source scope')
     sha(scope['base'], 'source base')
@@ -239,12 +267,21 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
     if report['status'] in ('degraded', 'failed'):
         require(report['coverage_limits'], 'incomplete review requires explicit coverage limits')
     choice(report['integration_status'], ('complete', 'degraded', 'failed', 'not_applicable'), 'integration status')
+    if report['version'] == 2:
+        contract_review_applicability(report, changes)
     if report['integration_status'] in ('degraded', 'failed'):
         require(report['coverage_limits'], 'incomplete integration requires explicit coverage limits')
     if report['integration_status'] == 'not_applicable':
         string(report.get('integration_skip_reason'), 'integration skip reason')
         require(changes < 2, 'multiple changed repositories require independent contract review')
         require(integration_receipt is None, 'an executed contract review cannot be declared inapplicable')
+    if report['version'] == 2 and report['integration_status'] == 'complete':
+        receipt_scope(integration_receipt, scope, 'integration receipt')
+        require(isinstance(integration_receipt.get('findings'), list), 'integration receipt findings must be a list')
+        coverage_inventory(integration_receipt, 'boundary_checks',
+                           ('input_branch', 'validation_transformation', 'destination', 'observed_result'))
+        coverage_inventory(integration_receipt, 'credential_policy_matrix',
+                           ('representation', 'source', 'transformation', 'destination', 'policy', 'observed_result'))
     if report['status'] == 'complete':
         require(report['integration_status'] in ('complete', 'not_applicable'),
                 'complete report cannot omit a required review stage')
@@ -252,7 +289,7 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
         coverage = obj(ce_receipt.get('coverage'), ('depth',), 'CE coverage')
         choice(coverage['depth'], ('lite', 'focused', 'full'), 'CE depth')
         strings(ce_receipt.get('reviewers'), 'CE reviewers', True)
-        if report['integration_status'] == 'complete':
+        if report['version'] == 1 and report['integration_status'] == 'complete':
             receipt_scope(integration_receipt, scope, 'integration receipt')
             require(isinstance(integration_receipt.get('findings'), list), 'integration receipt findings must be a list')
     finding_dispositions(report, ce_receipt, integration_receipt)
@@ -271,6 +308,8 @@ def recommendation(report, ce_receipt=None, integration_receipt=None, manifest_l
             reasons.append(f"Required check failed: {check['name']}")
     if reasons:
         return {'status': 'hold', 'reasons': reasons}
+    if report['version'] == 1:
+        reasons.append('Legacy v1 report lacks the contract applicability and coverage inventory contract')
     if report['status'] != 'complete':
         reasons.append(f"Review status: {report['status']}")
     if report['integration_status'] in ('degraded', 'failed'):
@@ -312,11 +351,31 @@ def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lo
     lines += ['', '## Scope and coverage', '',
               f"Composite base: `{report['source_scope']['base']}`; head: `{report['source_scope']['head_sha']}`.",
               f"Review: {report['status']}; integration: {report['integration_status']}."]
+    if report['version'] == 2:
+        applicability = report['contract_review']
+        lines.append(f"Contract review required: {str(applicability['required']).lower()}; reason: {data(applicability['reason'])}")
+        lines.extend(f"- Applicability evidence: {data(item)}" for item in applicability['evidence'])
     for repo in report['repositories']:
         lines.append(f"- {data(repo['name'])} ({repo['role']}): `{repo['base']}` → `{repo['head']}`")
     if report['integration_status'] == 'not_applicable':
         lines.append(f"Integration skip: {data(report['integration_skip_reason'])}")
     lines += [f"- Coverage limit: {data(limit)}" for limit in report['coverage_limits']]
+    if report['version'] == 2 and report['integration_status'] == 'complete' and integration_receipt is not None:
+        lines += ['', '## Contract review coverage', '']
+        for name, heading, fields in (
+                ('boundary_checks', 'Boundary checks', ('input_branch', 'validation_transformation', 'destination', 'observed_result')),
+                ('credential_policy_matrix', 'Credential policy matrix', ('representation', 'source', 'transformation', 'destination', 'policy', 'observed_result'))):
+            inventory = integration_receipt[name]
+            lines += [f'### {heading}', '']
+            if inventory['rows']:
+                for row in inventory['rows']:
+                    lines.append('- ' + '; '.join(f'{field}: {data(row[field])}' for field in fields))
+                    lines.append(f"  - Base/head attribution: {data(row['base_head_attribution'])}")
+                    lines.extend(f'  - Evidence: {data(item)}' for item in row['evidence'])
+            else:
+                lines.append(f"Not applicable: {data(inventory['not_applicable_reason'])}")
+                lines.extend(f"- Evidence: {data(item)}" for item in inventory['not_applicable_evidence'])
+            lines.append('')
     lines += ['', '## Walkthrough', '']
     if not report['walkthrough']:
         lines.append('No walkthrough entries supplied.')

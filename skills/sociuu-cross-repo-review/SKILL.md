@@ -36,19 +36,31 @@ intent; these are general review criteria, not a requirement to find a defect.
 Source paths in findings include the repository directory prefix.
 
 When at least two repositories change, a changed contract has a consumer in
-another repository, or changed input handling reaches persisted state or a
-query/write selector, dispatch one fresh independent contract reviewer
+another repository, changed input handling reaches persisted state or a
+query/write selector, or authentication/return-URL/diagnostic credential handling
+changes, dispatch one fresh independent contract reviewer
 with [integration-review.md](references/integration-review.md), the neutral
 intent and the prepared tree/base/head. It examines interactions across
-repositories and local input/persistence boundaries; CE owns the ordinary
-review. Producer and consumer may be in the same repository. Otherwise record
+repositories, local input/persistence boundaries and edited authentication,
+return-URL or diagnostic credential flows; CE owns the ordinary review.
+Producer and consumer may be in the same repository. Otherwise record
 the specific reason no additional pass was needed. Keep `integration_status`
-as the receipt field for this pass.
+as the receipt field for this pass. For every new dossier use report version 2
+and set `contract_review` to `{required:boolean, reason:string, evidence:[string]}`
+from the examined source. Supply a specific reason and nonempty source evidence
+whether the pass is required or inapplicable. Two or more changed repositories
+always require the pass. A declared required pass cannot be skipped in a complete
+report. Python checks this declaration's consistency, not the truth of the
+reviewer's applicability judgment.
 
 Validate new integration findings against both sides of the contract. Merge
 duplicates by cause and trigger, preserve unresolved material concerns, and
-retain CE's receipt unchanged beside the combined result. Report findings,
-source revisions, checks actually run, independence and coverage limits.
+retain CE's receipt unchanged beside the combined result. Before preparing the
+combined report, assess each retained finding against behavior-review.md's
+severity criteria using its final observable consequence and preconditions.
+Record the rationale in finding/disposition evidence and make severity or
+finding-type changes explicit reclassifications; never edit the raw receipts.
+Report findings, source revisions, checks actually run, independence and coverage limits.
 Static inspection does not establish live behavior. Fixing a source revision
 requires a new snapshot and review of the affected changes.
 

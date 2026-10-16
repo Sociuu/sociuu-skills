@@ -146,6 +146,9 @@ def note_candidates(notes):
 
 def publish(args):
     report = json.loads(args.report.read_text())
+    if args.publish:
+        require(isinstance(report, dict) and report.get('version') == 2,
+                'explicit publication requires report version 2')
     ce = json.loads(args.ce_receipt.read_text()) if args.ce_receipt else None
     integration = json.loads(args.integration_receipt.read_text()) if args.integration_receipt else None
     manifest_lock = json.loads(args.manifest_lock.read_text())

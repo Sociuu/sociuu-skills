@@ -117,6 +117,23 @@ class GitlabTests(unittest.TestCase):
         self.assertIn(SHA_B, (self.root / 'preview.md').read_text())
         self.assertFalse(any('--method' in c for c in self.loaded()['calls']))
 
+    def test_legacy_preview_is_incomplete_and_explicit_publish_rejects_before_network(self):
+        report = self.report_files()
+        report['version'] = 1
+        (self.root / 'report.json').write_text(json.dumps(report))
+        args = ('publish', '--project', 'test/apex', '--mr', '7', '--report', str(self.root / 'report.json'),
+                '--ce-receipt', str(self.root / 'ce.json'), '--manifest-lock', str(self.root / 'manifest.json'),
+                '--output', str(self.root / 'preview.md'))
+        preview = self.run_cli(*args)
+        self.assertEqual(preview.returncode, 0, preview.stderr)
+        self.assertIn('Legacy v1', (self.root / 'preview.md').read_text())
+        calls_before = self.loaded()['calls']
+        published = self.run_cli(*args, '--publish')
+        self.assertNotEqual(published.returncode, 0)
+        self.assertIn('version 2', published.stderr)
+        self.assertEqual(self.loaded()['calls'], calls_before)
+        self.assertEqual(self.loaded()['notes'], [])
+
     def test_stale_or_closed_refuses_publication(self):
         pending_diff = self.mr()
         pending_diff['sha'] = SHA_C
@@ -196,6 +213,8 @@ class GitlabTests(unittest.TestCase):
         report['repositories'].append({'name': 'prime', 'project': 'test/prime', 'base': SHA_A,
                                        'head': SHA_B, 'role': 'change'})
         report['status'] = 'degraded'; report['integration_status'] = 'degraded'
+        report['contract_review'] = {'required': True, 'reason': 'Two repositories changed.',
+                                     'evidence': ['apex and prime manifest change entries']}
         report['coverage_limits'] = ['Companion review incomplete.']
         lock = manifest(); lock['repositories'].append({k:v for k,v in report['repositories'][-1].items() if k != 'project'})
         (self.root / 'manifest.json').write_text(json.dumps(lock))
