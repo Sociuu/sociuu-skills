@@ -21,6 +21,26 @@ Required top-level fields for an MR dossier:
 - `integration_status`: complete/degraded/failed/not_applicable; when not_applicable, nonempty `integration_skip_reason`.
 - `contract_review` (v2): `{required:boolean, reason:string, evidence:[string]}`. The reason and source evidence are nonempty. The reviewer decides semantic applicability from the edited source: two or more changed repositories always require the pass; one repository also requires it for a changed contract consumer, input to persistence or a query/write selector, or authentication/return-URL/diagnostic credential handling. `required:true` forbids `not_applicable`; an actual skip requires `required:false` and a specific skip reason. An optional pass may run voluntarily, and its failed/degraded state remains visible. A required pass may be degraded/failed only in an incomplete dossier. Structural validation cannot authenticate the reviewer's applicability claim or the truth of its source evidence.
 
+For v2 with nonempty final `findings`, `checks` must contain exactly one
+`id:calibration` check with `required:true`; complete status requires that check
+to pass with nonempty evidence. A failed/unavailable/incomplete calibration may
+be represented in a degraded or failed dossier with explicit coverage limits,
+but cannot yield a clean complete review. With no retained candidates, no extra
+worker is mandatory: record an explicit zero-candidate skip reason in checks.
+If calibration ran and failed or remained incomplete, removing final findings does not
+permit complete status. The helper enforces the nonempty-findings declaration,
+not the semantic truth of a zero-candidate claim or an earlier worker outcome.
+
+Follow behavior-review.md's rating-hidden projection and original calibration
+JSON contract. Retain the exact projection and worker artifact, pinned scope,
+worker/context provenance, and unchanged CE/contract receipts for inspection;
+reference them in check evidence. Reconcile grouping and grades through existing
+`finding_dispositions`, including explicit reclassifications and many-to-one
+causal merges. Structural checks cannot establish that ratings were hidden,
+source judgments are true or independence was real. No extra report version or
+publication authority is introduced. Prior private v2 artifacts reproduce using
+their frozen helper bytes; v1 compatibility is unchanged.
+
 Every report requires the original `prepare.py` snapshot receipt as a separate `manifest_lock` argument: its version, composite base/head and all original repository name/base/head/role values must match the dossier. Checkout paths remain private and are not rendered. This prevents accidental stale-source relabelling; it does not authenticate arbitrary files supplied by a malicious caller.
 
 Every v2 receipt claimed as a complete integration pass must match the report scope and carry valid findings and both inventories, even when the overall dossier is degraded. Malformed complete evidence is invalid.

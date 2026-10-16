@@ -34,12 +34,19 @@ whether it was introduced, extended or merely remains in the edited boundary.
 An existing issue is not evidence of a newly introduced regression.
 
 Use the contract pass's boundary inventory and credential policy matrix when
-applicable, including retained branches and unassessed destinations. Apply
-[behavior-review.md](behavior-review.md)'s severity criteria after combining
-findings. Explain supported impact, preconditions and recovery in the existing
-finding/disposition evidence. Keep original CE/contract ratings visible when
-reclassified. Verification gaps, low-value effects and unresolved consequences
-remain distinct; a lower severity is not evidence that a missing check passed.
+applicable, including retained branches and unassessed destinations. Run
+[behavior-review.md](behavior-review.md)'s fresh rating-hidden independent
+calibration after CE/contract source validation and before the final dossier
+when retained candidates exist. Preserve the exact projected inputs, original
+calibration JSON and worker/context provenance beside the raw receipts. Account
+for every input group through explicit dispositions and causal merges; explain
+supported impact, preconditions, recovery and any source-backed disagreement.
+Keep original CE/contract ratings visible when reclassified. Record the required
+`calibration` check with artifact evidence; an incomplete or failed worker keeps
+the dossier incomplete. With zero retained candidates, record the explicit skip
+reason. Verification gaps and unresolved consequences remain visible after
+reconciliation. Declaration checks cannot prove semantic honesty or independence;
+raw artifacts and provenance must remain inspectable.
 
 ## Checks and documentation
 

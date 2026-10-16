@@ -56,7 +56,89 @@ def integration_fixture(scope):
                                          'not_applicable_evidence': ['src/value.py:8 input and response']}}
 
 
+def calibration_check(status='pass', required=True):
+    return {'id': 'calibration', 'name': 'Independent calibration', 'status': status,
+            'required': required, 'reason': 'Retained claims need fresh source calibration.',
+            'evidence': ['calibration.json: pinned scope, input F1 and original worker result']}
+
+
 class ReportTests(unittest.TestCase):
+    def calibration_report(self):
+        report, ce = fixture()
+        report['findings'] = [{'id': 'F1', 'title': 'Limited display failure', 'severity': 'P3',
+                               'repository': 'apex', 'path': 'src/value.py', 'line': 8,
+                               'trigger': 'Read value', 'consequence': 'Display omits value',
+                               'evidence': ['src/value.py:8'], 'suggested_correction': 'Return value',
+                               'validation_status': 'confirmed', 'materiality': 'low_value', 'origin': 'CE'}]
+        ce['findings'] = [{'#': 1, 'title': 'Limited display failure', 'severity': 'P3'}]
+        report['finding_dispositions'] = [{'stage': 'ce', 'source_id': '1', 'action': 'retained',
+                                           'finding_id': 'F1', 'reason': 'Same defect', 'evidence': []}]
+        return report, ce
+
+    def test_v2_retained_findings_require_calibration(self):
+        report, ce = self.calibration_report()
+        with self.assertRaisesRegex(ValueError, 'calibration'):
+            module.recommendation(report, ce, manifest_lock=manifest())
+
+    def test_v2_complete_calibration_requires_pass_and_required(self):
+        for status, required in [('fail', True), ('warning', True), ('unavailable', True),
+                                 ('not_applicable', True), ('pass', False)]:
+            report, ce = self.calibration_report()
+            report['checks'].append(calibration_check(status, required))
+            with self.subTest(status=status, required=required), self.assertRaisesRegex(ValueError, 'calibration'):
+                module.recommendation(report, ce, manifest_lock=manifest())
+
+    def test_v2_pass_calibration_retains_finding_and_requires_evidence(self):
+        report, ce = self.calibration_report()
+        report['checks'].append(calibration_check())
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'pass')
+        self.assertIn('Independent calibration', module.render_report(report, ce, manifest_lock=manifest()))
+        report['checks'][-1]['evidence'] = []
+        with self.assertRaises(ValueError):
+            module.recommendation(report, ce, manifest_lock=manifest())
+
+    def test_v2_degraded_calibration_preserves_failure_and_coverage(self):
+        for status, expected in [('fail', 'hold'), ('warning', 'incomplete'), ('unavailable', 'incomplete')]:
+            report, ce = self.calibration_report()
+            report['status'] = 'degraded'
+            report['coverage_limits'] = ['Fresh calibration did not finish source validation.']
+            report['checks'].append(calibration_check(status))
+            with self.subTest(status=status):
+                self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], expected)
+                self.assertIn('Fresh calibration did not finish', module.render_report(report, ce, manifest_lock=manifest()))
+
+    def test_v2_complete_zero_findings_cannot_hide_failed_calibration(self):
+        for status in ('fail', 'warning', 'unavailable'):
+            report, ce = fixture()
+            report['checks'].append(calibration_check(status))
+            for operation in (module.validate_report, module.recommendation):
+                with self.subTest(status=status, operation=operation.__name__), self.assertRaisesRegex(ValueError, 'calibration'):
+                    operation(report, ce, manifest_lock=manifest())
+
+    def test_v2_zero_candidates_can_declare_calibration_inapplicable(self):
+        report, ce = fixture()
+        report['checks'].append(calibration_check('not_applicable', False))
+        report['checks'][-1]['reason'] = 'No retained candidates remain after CE/contract source validation.'
+        module.validate_report(report, ce, manifest_lock=manifest())
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'pass')
+
+    def test_legacy_v1_empty_findings_failed_calibration_remains_valid(self):
+        for status, expected in [('fail', 'hold'), ('warning', 'incomplete'), ('unavailable', 'incomplete')]:
+            report, ce = fixture()
+            report['version'] = 1
+            report['checks'].append(calibration_check(status))
+            with self.subTest(status=status):
+                module.validate_report(report, ce, manifest_lock=manifest())
+                self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], expected)
+
+    def test_v2_duplicate_calibration_rejected_and_zero_findings_can_skip(self):
+        report, ce = self.calibration_report()
+        report['checks'] += [calibration_check(), calibration_check()]
+        with self.assertRaises(ValueError):
+            module.recommendation(report, ce, manifest_lock=manifest())
+        report, ce = fixture()
+        self.assertEqual(module.recommendation(report, ce, manifest_lock=manifest())['status'], 'pass')
+
     def test_legacy_v1_preserves_known_hold_precedence(self):
         report, ce = fixture()
         report['version'] = 1
@@ -208,6 +290,7 @@ class ReportTests(unittest.TestCase):
 
     def test_integration_findings_cannot_be_omitted_and_dedup_keeps_both_sources(self):
         report, ce = fixture()
+        report['checks'].append(calibration_check())
         report['integration_status'] = 'complete'
         report['contract_review'] = {'required': True, 'reason': 'A changed input branch reaches a consumer.',
                                      'evidence': ['src/value.py:8 request branch']}
@@ -251,6 +334,7 @@ class ReportTests(unittest.TestCase):
 
     def test_material_receipt_finding_cannot_be_silently_downgraded(self):
         report, ce = fixture()
+        report['checks'].append(calibration_check())
         ce['findings'] = [{'#': 1, 'title': 'Wrong value', 'severity': 'P1', 'validation_status': 'confirmed'}]
         report['findings'] = [{'id': 'F1', 'title': 'Intentional fallback', 'severity': 'P3', 'repository': 'apex',
                               'path': 'src/value.py', 'line': 8, 'trigger': 'Provider fails',
@@ -309,6 +393,7 @@ class ReportTests(unittest.TestCase):
 
     def test_advisory_precedence_and_coverage(self):
         report, ce = fixture()
+        report['checks'].append(calibration_check())
         report['findings'] = [{'id': 'F1', 'title': 'Wrong tenant', 'severity': 'P1', 'repository': 'apex',
                                'path': 'src/value.py', 'line': 8, 'trigger': 'Cross tenant request',
                                'consequence': 'Data leak', 'evidence': ['src/value.py:8'],

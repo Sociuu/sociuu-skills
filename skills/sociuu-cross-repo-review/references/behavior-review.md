@@ -112,3 +112,54 @@ the most damaging hypothetical extension. Preserve a credible unresolved
 high-impact concern as unresolved with its missing evidence. Reclassification
 must retain the original receipt, explain the change and remain visible; it
 must not turn missing evidence into a clean review.
+
+## Fresh independent calibration
+
+After CE and contract source validation, and before writing the final combined
+dossier, dispatch a fresh independent worker whenever retained candidate
+findings exist. Use a new context with no coordinator history or earlier review
+ratings. Give it only the prepared tree path and pinned base/head, these generic
+behavior, intent and severity criteria, and a claim projection containing stable
+input IDs, title, repository-prefixed path, line, reachable trigger, alleged
+consequence and suggested correction. Strip explicit rating prefixes from
+titles. Withhold original severity, validation, materiality, disposition and
+rating rationale, raw receipts and coordinator history. Treat projected claims
+as allegations to check against the source, not established findings.
+
+The worker independently traces each claim to its final observable effect,
+checks intent against source/callers/tests, groups claims sharing one causal
+defect and assigns supported P0-P3, finding type and validation status. For every
+input ID, return actor, preconditions, final effect, recovery and exact source
+evidence, or the specific missing evidence. Apply the severity criteria above
+without a blanket downgrade for data or security defects. Preserve credible
+unresolved concerns, including high-impact risks whose reachability is uncertain.
+Different wording or symptoms alone do not establish distinct defects; causal
+merges must explain the shared source failure and account for all input IDs.
+
+Return an original JSON artifact with `scope:{base,head_sha}`, overall
+`status:complete|degraded|failed`, and `groups:[{input_ids, severity, finding_type,
+validation_status, actor, preconditions, final_effect, recovery, evidence,
+missing_evidence}]`. `input_ids` maps every projected ID exactly once, including
+rejected or unresolved claims; `finding_type` is
+`consequential|verification_gap|low_value|unresolved`, and `validation_status` is
+`confirmed|unresolved|rejected`. Evidence gives source paths/lines and reasoning;
+missing evidence stays explicit. A rejected claim still receives a supported
+severity assessment of its alleged effect, with rejection explained in evidence.
+Incomplete source coverage makes the artifact degraded/failed, not complete.
+
+The coordinator retains the exact projection, original worker JSON, worker
+identity/context provenance and pinned source scope beside the unchanged raw
+CE/contract receipts. Reconcile all input groups against those receipts in the
+existing `finding_dispositions`: explain retained/rejected claims, record changed
+ratings/types/validation as explicit reclassifications, and map causal duplicates
+to one final finding while preserving every original source ID. Explain any
+source-backed disagreement with calibration; never erase missing evidence or
+uncertainty to obtain a clean result. A failed/incomplete calibration cannot
+produce a complete dossier even if reconciliation removes every final finding.
+With zero retained candidates before calibration, skip the worker and record
+that exact reason in checks.
+
+Record the calibration check and artifact evidence under report-contract.md.
+A declaration and structural validation cannot authenticate semantic honesty,
+source reasoning or actual independence; the original artifacts and provenance
+are required for inspection. Calibration grants no publication or merge authority.

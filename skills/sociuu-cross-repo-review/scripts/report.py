@@ -241,6 +241,16 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
         require(type(item['required']) is bool, 'check required must be boolean')
         string(item['reason'], 'check reason')
         strings(item['evidence'], 'check evidence', item['status'] == 'pass' or identifier == 'docs')
+    if report['version'] == 2:
+        calibration = [item for item in report['checks'] if item['id'] == 'calibration']
+        if report['findings']:
+            require(len(calibration) == 1, 'retained findings require exactly one calibration check')
+            require(calibration[0]['required'], 'calibration check must be required for retained findings')
+            require(report['status'] != 'complete' or calibration[0]['status'] == 'pass',
+                    'complete report requires passed calibration')
+        if report['status'] == 'complete' and calibration:
+            require(calibration[0]['status'] in ('pass', 'not_applicable'),
+                    'complete report cannot retain failed or incomplete calibration')
     qa = obj(report['qa_runbook'], ('setup', 'steps', 'negative_cases', 'cleanup', 'execution_status', 'results'), 'QA runbook')
     for key in ('setup', 'cleanup', 'results'):
         strings(qa[key], 'QA ' + key)

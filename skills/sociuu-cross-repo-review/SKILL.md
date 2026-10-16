@@ -53,13 +53,16 @@ always require the pass. A declared required pass cannot be skipped in a complet
 report. Python checks this declaration's consistency, not the truth of the
 reviewer's applicability judgment.
 
-Validate new integration findings against both sides of the contract. Merge
-duplicates by cause and trigger, preserve unresolved material concerns, and
-retain CE's receipt unchanged beside the combined result. Before preparing the
-combined report, assess each retained finding against behavior-review.md's
-severity criteria using its final observable consequence and preconditions.
-Record the rationale in finding/disposition evidence and make severity or
-finding-type changes explicit reclassifications; never edit the raw receipts.
+Validate new integration findings against both sides of the contract. Preserve
+unresolved material concerns and retain CE/contract receipts unchanged. After
+CE/contract source validation and before the final combined dossier, run the
+mandatory fresh independent calibration in
+[behavior-review.md](references/behavior-review.md) whenever candidate findings
+remain. Give the worker only the pinned source and rating-hidden claim projection
+specified there. Preserve its original JSON artifact and reconcile every input
+with the original receipts using explicit dispositions, reclassifications and
+causal merges. Failed or incomplete calibration keeps the dossier incomplete;
+zero retained candidates skip the worker with an explicit reason in checks.
 Report findings, source revisions, checks actually run, independence and coverage limits.
 Static inspection does not establish live behavior. Fixing a source revision
 requires a new snapshot and review of the affected changes.
