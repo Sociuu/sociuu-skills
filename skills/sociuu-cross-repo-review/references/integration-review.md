@@ -40,20 +40,47 @@ for either inventory only when its boundary or credential flow is absent;
 give a specific reason and nonempty source evidence. Follow the representations
 and policy questions in behavior-review.md.
 
+Every row in either inventory and any `optional_field_matrix` declares
+`concern_ids:[string]`. Return `inventory_concerns:[...]` alongside `findings`:
+each concern has `id`, `title`, `severity`, `repository`, repository-relative
+`path`, positive `line`, `trigger`, `consequence`, nonempty `evidence`,
+`suggested_correction`, `validation_status` and `materiality`, using the finding
+values in [report-contract.md](report-contract.md). IDs are unique across the
+inventory concerns; rows reference these IDs and every concern has a row link.
+Use multiple row links to the same concern when one failure spans branches.
+Ordinary `findings` and inventory concerns remain distinct source identities;
+if they describe one defect, explain that causal merge during calibration.
+
+Before returning the receipt, trace every observed mismatch, failure or uncertain
+contract to its final effect. A supported or credible unresolved concern becomes
+a linked claim for source validation and rating-hidden calibration. This
+includes an accepted input's persisted/serialized representation conflicting with
+a newly documented response field. A table observation or proposed QA case alone
+does not close a concern. `concern_ids:[]` is an evidenced judgment that the row
+establishes no concern; supply its source rationale in the row's existing result
+and evidence fields. An uncertain material effect stays a linked unresolved
+claim with its missing evidence. The coordinator audits this semantic sweep
+before considering a zero-claim calibration skip. Parsing cannot prove the
+reviewer's no-concern judgment true.
+
 These are review prompts, not automatic findings. Establish an affected caller
 and a causal failure path. Prefer consequential problems over rewrites or
 style preferences. Do not require a finding from an adequate change.
 For edited persistence branches that rebuild optional values, return an
 `optional_field_matrix` with field/group, saved input, omitted and explicit-clear
-results, caller evidence and base/head attribution. Empty is valid only with a
-specific not-applicable reason. Include affected pre-existing failures separately
+results, caller evidence and base/head attribution. Its row fields are
+`field_group`, `saved_input`, `omitted_result`, `explicit_clear_result`,
+`caller_evidence:[string]`, `evidence:[string]`, `base_head_attribution` and
+`concern_ids:[string]`. Empty uses the same source-evidenced not-applicable
+shape as the other inventories. Include affected pre-existing failures separately
 from new regressions, labelled in their titles and evidence; ambiguous intent
 is an unresolved verification gap, not a confirmed defect. Preserve CE's own
 regression-only disposition rather than rewriting its raw receipt.
 
 Return JSON with `status` (`complete`, `degraded`, `failed`), `findings`,
 `scope` (`base` and `head_sha`), `contracts_examined`, `checks_run` and
-`coverage_limits`. Include both coverage inventories above in every complete receipt.
+`coverage_limits`. Include both coverage inventories and `inventory_concerns`
+(an empty list is allowed after the semantic sweep) in every complete receipt.
 Each finding includes
 an ID, title, severity (`P0`, `P1`, `P2` or `P3`), source file/line, producer and
 consumer file pointers, trigger, consequence, evidence and suggested correction.
