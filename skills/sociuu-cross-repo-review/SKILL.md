@@ -45,7 +45,7 @@ repositories, local input/persistence boundaries and edited authentication,
 return-URL or diagnostic credential flows; CE owns the ordinary review.
 Producer and consumer may be in the same repository. Otherwise record
 the specific reason no additional pass was needed. Keep `integration_status`
-as the receipt field for this pass. For every new dossier use report version 2
+as the receipt field for this pass. For every new dossier use report version 3
 and set `contract_review` to `{required:boolean, reason:string, evidence:[string]}`
 from the examined source. Supply a specific reason and nonempty source evidence
 whether the pass is required or inapplicable. Two or more changed repositories
@@ -53,16 +53,24 @@ always require the pass. A declared required pass cannot be skipped in a complet
 report. Python checks this declaration's consistency, not the truth of the
 reviewer's applicability judgment.
 
-Validate new integration findings against both sides of the contract. Preserve
-unresolved material concerns and retain CE/contract receipts unchanged. After
-CE/contract source validation and before the final combined dossier, run the
+Validate integration findings and inventory concerns against both sides of the
+contract. Audit every inventory row against its concern links before building
+the calibration projection: a supported or credible unresolved failure belongs
+in `inventory_concerns` even if absent from `findings`. An empty `concern_ids`
+declares an evidenced no-concern judgment. Missing semantic closure keeps the
+dossier incomplete; preserve original receipts unchanged, including any scoped imported analyzer candidates described in report-contract.md. Preserve unresolved
+material concerns. After source validation and before the final dossier, run the
 mandatory fresh independent calibration in
-[behavior-review.md](references/behavior-review.md) whenever candidate findings
-remain. Give the worker only the pinned source and rating-hidden claim projection
+[behavior-review.md](references/behavior-review.md) for all raw findings and
+inventory concerns, including claims proposed for rejection. Give the worker
+only the pinned source and rating-hidden claim projection
 specified there. Preserve its original JSON artifact and reconcile every input
 with the original receipts using explicit dispositions, reclassifications and
 causal merges. Failed or incomplete calibration keeps the dossier incomplete;
-zero retained candidates skip the worker with an explicit reason in checks.
+skip only when there are no raw findings, inventoried concerns or final candidates,
+with a source-evidenced reason in checks. Row parsing proves declared links, not
+that prose contains no undeclared concern; the source audit and independent
+calibration must establish that semantic coverage.
 Report findings, source revisions, checks actually run, independence and coverage limits.
 Static inspection does not establish live behavior. Fixing a source revision
 requires a new snapshot and review of the affected changes.
