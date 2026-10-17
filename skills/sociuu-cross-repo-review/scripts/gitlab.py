@@ -147,12 +147,14 @@ def note_candidates(notes):
 def publish(args):
     report = json.loads(args.report.read_text())
     if args.publish:
-        require(isinstance(report, dict) and report.get('version') == 2,
-                'explicit publication requires report version 2')
+        require(isinstance(report, dict) and report.get('version') == 3,
+                'explicit publication requires report version 3')
     ce = json.loads(args.ce_receipt.read_text()) if args.ce_receipt else None
     integration = json.loads(args.integration_receipt.read_text()) if args.integration_receipt else None
+    calibration = json.loads(args.calibration_receipt.read_text()) if args.calibration_receipt else None
+    analyzer = json.loads(args.analyzer_receipt.read_text()) if args.analyzer_receipt else None
     manifest_lock = json.loads(args.manifest_lock.read_text())
-    rendered = render_report(report, ce, integration, manifest_lock)
+    rendered = render_report(report, ce, integration, manifest_lock, calibration, analyzer)
     require(MARKER not in rendered, 'report contains reserved publication marker')
     body = MARKER + '\n' + rendered
     require(body.count(MARKER) == 1 and not QUICK_ACTION.search(body),
@@ -210,6 +212,8 @@ def main():
     publish_parser.add_argument('--report', required=True, type=Path)
     publish_parser.add_argument('--ce-receipt', type=Path)
     publish_parser.add_argument('--integration-receipt', type=Path)
+    publish_parser.add_argument('--calibration-receipt', type=Path)
+    publish_parser.add_argument('--analyzer-receipt', type=Path)
     publish_parser.add_argument('--manifest-lock', required=True, type=Path)
     publish_parser.add_argument('--companion', action='append', default=[], metavar='PROJECT!IID')
     publish_parser.add_argument('--output', required=True, type=Path)
