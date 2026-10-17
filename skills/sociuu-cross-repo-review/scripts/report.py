@@ -107,14 +107,73 @@ def manifest_scope(report, manifest_lock):
     require(actual == expected, 'report repositories differ from the reviewed snapshot')
 
 
-def finding_dispositions(report, ce_receipt, integration_receipt):
+def source_claims(report, claims, label):
+    require(isinstance(claims, list), label + 's must be a list')
+    repositories = {repo['name'] for repo in report['repositories']}
+    identifiers = set()
+    for concern in claims:
+        obj(concern, ('id', 'title', 'severity', 'repository', 'path', 'line', 'trigger', 'consequence',
+                      'evidence', 'suggested_correction', 'validation_status', 'materiality'), label)
+        identifier = string(concern['id'], label + ' ID')
+        require(identifier not in identifiers, 'duplicate ' + label + ' ID')
+        identifiers.add(identifier)
+        for field in ('title', 'trigger', 'consequence', 'suggested_correction'):
+            string(concern[field], label + ' ' + field)
+        choice(concern['severity'], ('P0', 'P1', 'P2', 'P3'), label + ' severity')
+        choice(concern['validation_status'], ('confirmed', 'unresolved'), label + ' validation')
+        choice(concern['materiality'], ('consequential', 'verification_gap', 'low_value', 'unresolved'),
+               label + ' materiality')
+        require(concern['repository'] in repositories, label + ' repository is not listed')
+        path(concern['path'], label + ' path')
+        require(type(concern['line']) is int and concern['line'] > 0, label + ' line must be positive')
+        strings(concern['evidence'], label + ' evidence', True)
+    return identifiers
+
+
+def inventory_concerns(report, receipt):
+    """Check declared row-to-claim links, not the semantic absence of concerns."""
+    if report['version'] < 3 or receipt is None:
+        return []
+    obj(receipt, ('status',), 'integration receipt')
+    concerns = receipt.get('inventory_concerns', [] if receipt['status'] != 'complete' else None)
+    identifiers = source_claims(report, concerns, 'inventory concern')
+    linked = set()
+    for name in ('boundary_checks', 'credential_policy_matrix', 'optional_field_matrix'):
+        if name not in receipt:
+            continue
+        inventory = obj(receipt[name], ('rows',), name)
+        require(isinstance(inventory['rows'], list), name + ' rows must be a list')
+        if name == 'optional_field_matrix':
+            coverage_inventory(receipt, name, ('field_group', 'saved_input', 'omitted_result', 'explicit_clear_result'))
+        for row in inventory['rows']:
+            obj(row, ('concern_ids', 'evidence'), name + ' concern links')
+            strings(row['evidence'], name + ' evidence', True)
+            refs = strings(row['concern_ids'], name + ' concern IDs')
+            require(len(refs) == len(set(refs)), 'duplicate inventory concern reference')
+            require(set(refs) <= identifiers, 'unknown inventory concern reference')
+            linked.update(refs)
+            if name == 'optional_field_matrix':
+                strings(row.get('caller_evidence'), name + ' caller evidence', True)
+    require(linked == identifiers, 'unlinked inventory concern')
+    return concerns
+
+
+def finding_dispositions(report, ce_receipt, integration_receipt, analyzer_receipt=None):
     raw = {}
-    for stage, receipt, id_key in (('ce', ce_receipt, '#'), ('integration', integration_receipt, 'id')):
+    concerns = inventory_concerns(report, integration_receipt)
+    if analyzer_receipt is not None:
+        require(report['version'] == 3, 'analyzer candidate receipts require version 3')
+        obj(analyzer_receipt, ('status', 'findings'), 'analyzer candidate receipt')
+        require(report['status'] != 'complete' or analyzer_receipt['status'] == 'complete',
+                'complete report requires complete analyzer candidate receipt')
+        source_claims(report, analyzer_receipt['findings'], 'analyzer candidate')
+    for stage, receipt, id_key in (('ce', ce_receipt, '#'), ('integration', integration_receipt, 'id'),
+                                   ('inventory', integration_receipt, 'id'), ('analyzer', analyzer_receipt, 'id')):
         if receipt is None:
             continue
         obj(receipt, ('status',), stage + ' receipt')
         choice(receipt['status'], ('complete', 'degraded', 'failed', 'skipped'), stage + ' receipt status')
-        findings = receipt.get('findings', [] if receipt['status'] != 'complete' else None)
+        findings = concerns if stage == 'inventory' else receipt.get('findings', [] if receipt['status'] != 'complete' else None)
         require(isinstance(findings, list), stage + ' receipt requires findings')
         if 'scope' not in receipt:
             require(receipt['status'] != 'complete' and not findings,
@@ -137,7 +196,8 @@ def finding_dispositions(report, ce_receipt, integration_receipt):
     retained = {identifier: set() for identifier in reported}
     for item in report['finding_dispositions']:
         obj(item, ('stage', 'source_id', 'action', 'reason', 'evidence'), 'finding disposition')
-        choice(item['stage'], ('ce', 'integration'), 'disposition stage')
+        choice(item['stage'], ('ce', 'integration', 'inventory', 'analyzer') if report['version'] >= 3 else ('ce', 'integration'),
+               'disposition stage')
         string(item['source_id'], 'disposition source ID')
         key = (item['stage'], item['source_id'])
         require(key in raw and key not in accounted, 'unknown or duplicate finding disposition')
@@ -148,9 +208,11 @@ def finding_dispositions(report, ce_receipt, integration_receipt):
         if item['action'] in ('retained', 'reclassified'):
             identifier = item.get('finding_id')
             require(isinstance(identifier, str) and identifier in retained, 'disposition finding is not reported')
-            retained[identifier].add(item['stage'])
+            retained[identifier].add('integration' if item['stage'] == 'inventory' else item['stage'])
             source, destination = raw[key], reported[identifier]
             source_materiality = source.get('materiality', 'consequential' if source['severity'] != 'P3' else None)
+            if report['version'] == 3:
+                source_materiality = source.get('materiality', source.get('finding_type', source_materiality))
             changed = (source['severity'] != destination['severity'] or
                        source.get('validation_status', 'confirmed') != destination['validation_status'] or
                        source_materiality is not None and source_materiality != destination['materiality'])
@@ -162,15 +224,77 @@ def finding_dispositions(report, ce_receipt, integration_receipt):
     if report['status'] == 'complete':
         for finding in report['findings']:
             needed = {'CE': {'ce'}, 'integration': {'integration'},
-                      'both': {'ce', 'integration'}, 'analyzer': set()}[finding['origin']]
+                      'both': {'ce', 'integration'}, 'analyzer': {'analyzer'} if report['version'] == 3 else set()}[finding['origin']]
             require(needed <= retained[finding['id']], 'reported finding lacks its declared review provenance')
+    return raw
 
 
-def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_lock=None):
+def calibration_closure(report, raw, receipt):
+    expected = {stage + '/' + identifier for stage, identifier in raw}
+    checks = [check for check in report['checks'] if check['id'] == 'calibration']
+    require(len(checks) == 1, 'v3 requires exactly one calibration check or evidenced zero-claim skip')
+    check = checks[0]
+    if expected:
+        require(check['required'], 'calibration check must be required for source claims')
+        require(check['status'] != 'not_applicable', 'source claims cannot skip calibration')
+    elif receipt is None and check['status'] == 'not_applicable':
+        require(not check['required'], 'zero-claim calibration skip must be nonrequired')
+        strings(check['evidence'], 'zero-claim calibration skip evidence', True)
+        return
+    require(report['status'] != 'complete' or check['status'] == 'pass',
+            'complete report requires passed calibration closure')
+    if receipt is None:
+        require(check['status'] != 'pass', 'passed calibration requires original calibration receipt')
+        return
+    obj(receipt, ('scope', 'status', 'groups'), 'calibration receipt')
+    actual = obj(receipt['scope'], ('base', 'head_sha'), 'calibration scope')
+    require(all(actual[key] == report['source_scope'][key] for key in ('base', 'head_sha')),
+            'calibration receipt scope differs')
+    choice(receipt['status'], ('complete', 'degraded', 'failed'), 'calibration receipt status')
+    require(receipt['status'] == 'complete' or (report['status'] != 'complete' and check['status'] != 'pass'),
+            'failed or incomplete calibration cannot establish closure')
+    require(isinstance(receipt['groups'], list), 'calibration groups must be a list')
+    mapped = {item['stage'] + '/' + item['source_id']: item for item in report['finding_dispositions']}
+    findings = {finding['id']: finding for finding in report['findings']}
+    accounted = set()
+    for group in receipt['groups']:
+        obj(group, ('input_ids', 'severity', 'finding_type', 'validation_status', 'actor', 'preconditions',
+                    'final_effect', 'recovery', 'evidence', 'missing_evidence'), 'calibration group')
+        inputs = strings(group['input_ids'], 'calibration input IDs', True)
+        require(len(inputs) == len(set(inputs)) and not accounted.intersection(inputs),
+                'duplicate calibration input accounting')
+        require(set(inputs) <= expected, 'unknown calibration input')
+        accounted.update(inputs)
+        choice(group['severity'], ('P0', 'P1', 'P2', 'P3'), 'calibration severity')
+        choice(group['finding_type'], ('consequential', 'verification_gap', 'low_value', 'unresolved'),
+               'calibration finding type')
+        choice(group['validation_status'], ('confirmed', 'unresolved', 'rejected'), 'calibration validation')
+        for field in ('actor', 'final_effect', 'recovery'):
+            string(group[field], 'calibration ' + field)
+        strings(group['preconditions'], 'calibration preconditions', True)
+        strings(group['evidence'], 'calibration source evidence', True)
+        strings(group['missing_evidence'], 'calibration missing evidence', group['validation_status'] == 'unresolved')
+        destinations = set()
+        for identifier in inputs:
+            item = mapped[identifier]
+            if item['action'] == 'rejected':
+                continue
+            destinations.add(item['finding_id'])
+            finding = findings[item['finding_id']]
+            changed = (group['severity'] != finding['severity'] or group['finding_type'] != finding['materiality'] or
+                       group['validation_status'] != finding['validation_status'])
+            require(not changed or item['action'] == 'reclassified',
+                    'calibration disagreement requires explicit reclassification evidence')
+        require(len(destinations) <= 1, 'calibration causal group must map to one final finding')
+    require(receipt['status'] != 'complete' or accounted == expected,
+            'source claims are missing from calibration input accounting')
+
+
+def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_lock=None, calibration_receipt=None, analyzer_receipt=None):
     obj(report, ('version', 'status', 'source_scope', 'repositories', 'intent', 'summary',
                  'walkthrough', 'findings', 'checks', 'qa_runbook', 'diagrams', 'diagram_notes',
                  'coverage_limits', 'integration_status', 'finding_dispositions'), 'report')
-    require(type(report['version']) is int and report['version'] in (1, 2), 'unsupported report version')
+    require(type(report['version']) is int and report['version'] in (1, 2, 3), 'unsupported report version')
     choice(report['status'], ('complete', 'degraded', 'failed'), 'report status')
     scope = obj(report['source_scope'], ('base', 'head_sha'), 'source scope')
     sha(scope['base'], 'source base')
@@ -241,7 +365,7 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
         require(type(item['required']) is bool, 'check required must be boolean')
         string(item['reason'], 'check reason')
         strings(item['evidence'], 'check evidence', item['status'] == 'pass' or identifier == 'docs')
-    if report['version'] == 2:
+    if report['version'] >= 2:
         calibration = [item for item in report['checks'] if item['id'] == 'calibration']
         if report['findings']:
             require(len(calibration) == 1, 'retained findings require exactly one calibration check')
@@ -277,7 +401,7 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
     if report['status'] in ('degraded', 'failed'):
         require(report['coverage_limits'], 'incomplete review requires explicit coverage limits')
     choice(report['integration_status'], ('complete', 'degraded', 'failed', 'not_applicable'), 'integration status')
-    if report['version'] == 2:
+    if report['version'] >= 2:
         contract_review_applicability(report, changes)
     if report['integration_status'] in ('degraded', 'failed'):
         require(report['coverage_limits'], 'incomplete integration requires explicit coverage limits')
@@ -285,7 +409,7 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
         string(report.get('integration_skip_reason'), 'integration skip reason')
         require(changes < 2, 'multiple changed repositories require independent contract review')
         require(integration_receipt is None, 'an executed contract review cannot be declared inapplicable')
-    if report['version'] == 2 and report['integration_status'] == 'complete':
+    if report['version'] >= 2 and report['integration_status'] == 'complete':
         receipt_scope(integration_receipt, scope, 'integration receipt')
         require(isinstance(integration_receipt.get('findings'), list), 'integration receipt findings must be a list')
         coverage_inventory(integration_receipt, 'boundary_checks',
@@ -302,12 +426,14 @@ def validate_report(report, ce_receipt=None, integration_receipt=None, manifest_
         if report['version'] == 1 and report['integration_status'] == 'complete':
             receipt_scope(integration_receipt, scope, 'integration receipt')
             require(isinstance(integration_receipt.get('findings'), list), 'integration receipt findings must be a list')
-    finding_dispositions(report, ce_receipt, integration_receipt)
+    raw = finding_dispositions(report, ce_receipt, integration_receipt, analyzer_receipt)
+    if report['version'] == 3:
+        calibration_closure(report, raw, calibration_receipt)
     return report
 
 
-def recommendation(report, ce_receipt=None, integration_receipt=None, manifest_lock=None):
-    validate_report(report, ce_receipt, integration_receipt, manifest_lock)
+def recommendation(report, ce_receipt=None, integration_receipt=None, manifest_lock=None, calibration_receipt=None, analyzer_receipt=None):
+    validate_report(report, ce_receipt, integration_receipt, manifest_lock, calibration_receipt, analyzer_receipt)
     reasons = []
     for finding in report['findings']:
         if (finding['validation_status'] == 'confirmed' and finding['materiality'] == 'consequential'
@@ -320,6 +446,8 @@ def recommendation(report, ce_receipt=None, integration_receipt=None, manifest_l
         return {'status': 'hold', 'reasons': reasons}
     if report['version'] == 1:
         reasons.append('Legacy v1 report lacks the contract applicability and coverage inventory contract')
+    if report['version'] == 2:
+        reasons.append('Legacy v2 report lacks inventory concern closure and original calibration input accounting')
     if report['status'] != 'complete':
         reasons.append(f"Review status: {report['status']}")
     if report['integration_status'] in ('degraded', 'failed'):
@@ -348,8 +476,8 @@ def fenced(source, language):
     return f'{fence}{language}\n{source}\n{fence}'
 
 
-def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lock=None):
-    decision = recommendation(report, ce_receipt, integration_receipt, manifest_lock)
+def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lock=None, calibration_receipt=None, analyzer_receipt=None):
+    decision = recommendation(report, ce_receipt, integration_receipt, manifest_lock, calibration_receipt, analyzer_receipt)
     lines = ['# Cross-repository review', '', '## Summary', '',
              f"**Intent:** {data(report['intent'])}", '',
              f"**Problem:** {data(report['summary']['problem'])}", '',
@@ -361,7 +489,7 @@ def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lo
     lines += ['', '## Scope and coverage', '',
               f"Composite base: `{report['source_scope']['base']}`; head: `{report['source_scope']['head_sha']}`.",
               f"Review: {report['status']}; integration: {report['integration_status']}."]
-    if report['version'] == 2:
+    if report['version'] >= 2:
         applicability = report['contract_review']
         lines.append(f"Contract review required: {str(applicability['required']).lower()}; reason: {data(applicability['reason'])}")
         lines.extend(f"- Applicability evidence: {data(item)}" for item in applicability['evidence'])
@@ -370,11 +498,15 @@ def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lo
     if report['integration_status'] == 'not_applicable':
         lines.append(f"Integration skip: {data(report['integration_skip_reason'])}")
     lines += [f"- Coverage limit: {data(limit)}" for limit in report['coverage_limits']]
-    if report['version'] == 2 and report['integration_status'] == 'complete' and integration_receipt is not None:
+    if report['version'] >= 2 and report['integration_status'] == 'complete' and integration_receipt is not None:
         lines += ['', '## Contract review coverage', '']
-        for name, heading, fields in (
+        inventories = [
                 ('boundary_checks', 'Boundary checks', ('input_branch', 'validation_transformation', 'destination', 'observed_result')),
-                ('credential_policy_matrix', 'Credential policy matrix', ('representation', 'source', 'transformation', 'destination', 'policy', 'observed_result'))):
+                ('credential_policy_matrix', 'Credential policy matrix', ('representation', 'source', 'transformation', 'destination', 'policy', 'observed_result'))]
+        if report['version'] == 3 and 'optional_field_matrix' in integration_receipt:
+            inventories.append(('optional_field_matrix', 'Optional field matrix',
+                                ('field_group', 'saved_input', 'omitted_result', 'explicit_clear_result')))
+        for name, heading, fields in inventories:
             inventory = integration_receipt[name]
             lines += [f'### {heading}', '']
             if inventory['rows']:
@@ -382,6 +514,8 @@ def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lo
                     lines.append('- ' + '; '.join(f'{field}: {data(row[field])}' for field in fields))
                     lines.append(f"  - Base/head attribution: {data(row['base_head_attribution'])}")
                     lines.extend(f'  - Evidence: {data(item)}' for item in row['evidence'])
+                    if report['version'] == 3:
+                        lines.append('  - Concern IDs: ' + (', '.join(data(item) for item in row['concern_ids']) or 'None declared'))
             else:
                 lines.append(f"Not applicable: {data(inventory['not_applicable_reason'])}")
                 lines.extend(f"- Evidence: {data(item)}" for item in inventory['not_applicable_evidence'])
@@ -410,14 +544,17 @@ def render_report(report, ce_receipt=None, integration_receipt=None, manifest_lo
         if not qa[key]:
             lines.append('None supplied.')
         lines.append('')
-    decisions = [item for item in report['finding_dispositions'] if item['action'] != 'retained']
+    decisions = [item for item in report['finding_dispositions'] if report['version'] == 3 or item['action'] != 'retained']
     if decisions:
         lines += ['## Dispositioned review concerns', '']
         for item in decisions:
-            receipt = ce_receipt if item['stage'] == 'ce' else integration_receipt
+            receipt = {'ce': ce_receipt, 'analyzer': analyzer_receipt}.get(item['stage'], integration_receipt)
             key = '#' if item['stage'] == 'ce' else 'id'
-            source = next(value for value in receipt['findings'] if str(value[key]) == item['source_id'])
+            collection = receipt['inventory_concerns'] if item['stage'] == 'inventory' else receipt['findings']
+            source = next(value for value in collection if str(value[key]) == item['source_id'])
             lines.append(f"- {data(item['stage'])}/{data(item['source_id'])} ({item['action']}; source {source['severity']}): {data(item['reason'])}")
+            if 'finding_id' in item:
+                lines.append(f"  - Final finding: {data(item['finding_id'])}")
             lines.extend(f"  - Evidence: {data(value)}" for value in item['evidence'])
         lines.append('')
     lines += ['## Diagrams', '', f"Sequence applicability: {data(report['diagram_notes']['sequence'])}",
@@ -445,13 +582,17 @@ def main():
     parser.add_argument('--report', required=True, type=Path)
     parser.add_argument('--ce-receipt', type=Path)
     parser.add_argument('--integration-receipt', type=Path)
+    parser.add_argument('--calibration-receipt', type=Path)
+    parser.add_argument('--analyzer-receipt', type=Path)
     parser.add_argument('--manifest-lock', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     report = json.loads(args.report.read_text())
     ce = json.loads(args.ce_receipt.read_text()) if args.ce_receipt else None
     integration = json.loads(args.integration_receipt.read_text()) if args.integration_receipt else None
-    rendered = render_report(report, ce, integration, json.loads(args.manifest_lock.read_text()))
+    calibration = json.loads(args.calibration_receipt.read_text()) if args.calibration_receipt else None
+    analyzer = json.loads(args.analyzer_receipt.read_text()) if args.analyzer_receipt else None
+    rendered = render_report(report, ce, integration, json.loads(args.manifest_lock.read_text()), calibration, analyzer)
     args.output.write_text(rendered)
 
 
