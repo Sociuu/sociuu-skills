@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 
-from scripts.test_cross_repo_report import fixture, manifest, SHA_A, SHA_B, SHA_C
+from scripts.test_cross_repo_report import fixture, manifest, closure_fixture, analyzer_fixture, calibration_check, SHA_A, SHA_B, SHA_C
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'skills/sociuu-cross-repo-review/scripts/gitlab.py'
@@ -78,6 +78,9 @@ class GitlabTests(unittest.TestCase):
 
     def report_files(self):
         report, ce = fixture()
+        report['version'] = 3
+        report['checks'].append(calibration_check('not_applicable', False))
+        report['checks'][-1]['reason'] = 'No raw or inventoried source claims or final candidates.'
         report['repositories'][0]['project'] = 'test/apex'
         for name, value in [('report', report), ('ce', ce), ('manifest', manifest())]:
             (self.root / f'{name}.json').write_text(json.dumps(value))
@@ -130,9 +133,66 @@ class GitlabTests(unittest.TestCase):
         calls_before = self.loaded()['calls']
         published = self.run_cli(*args, '--publish')
         self.assertNotEqual(published.returncode, 0)
-        self.assertIn('version 2', published.stderr)
+        self.assertIn('version 3', published.stderr)
         self.assertEqual(self.loaded()['calls'], calls_before)
         self.assertEqual(self.loaded()['notes'], [])
+
+    def test_v2_preview_is_legacy_and_cannot_publish(self):
+        report = self.report_files()
+        report['version'] = 2
+        (self.root / 'report.json').write_text(json.dumps(report))
+        args = ('publish', '--project', 'test/apex', '--mr', '7', '--report', str(self.root / 'report.json'),
+                '--ce-receipt', str(self.root / 'ce.json'), '--manifest-lock', str(self.root / 'manifest.json'),
+                '--output', str(self.root / 'preview.md'))
+        preview = self.run_cli(*args)
+        self.assertEqual(preview.returncode, 0, preview.stderr)
+        self.assertIn('Legacy v2', (self.root / 'preview.md').read_text())
+        calls = self.loaded()['calls']
+        rejected = self.run_cli(*args, '--publish')
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertEqual(self.loaded()['calls'], calls)
+
+    def test_inventory_closure_is_checked_before_publication_and_rendered(self):
+        report, ce, integration, calibration = closure_fixture()
+        report['repositories'][0]['project'] = 'test/apex'
+        for name, value in [('report', report), ('ce', ce), ('integration', integration),
+                            ('calibration', calibration), ('manifest', manifest())]:
+            (self.root / f'{name}.json').write_text(json.dumps(value))
+        args = ('publish', '--project', 'test/apex', '--mr', '7', '--report', str(self.root / 'report.json'),
+                '--ce-receipt', str(self.root / 'ce.json'), '--integration-receipt', str(self.root / 'integration.json'),
+                '--manifest-lock', str(self.root / 'manifest.json'), '--output', str(self.root / 'preview.md'), '--publish')
+        missing = self.run_cli(*args)
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertEqual(self.loaded()['calls'], [])
+        published = self.run_cli(*args, '--calibration-receipt', str(self.root / 'calibration.json'))
+        self.assertEqual(published.returncode, 0, published.stderr)
+        body = self.loaded()['notes'][0]['body']
+        self.assertIn('inventory/OBS1', body)
+        self.assertIn('Final finding: F1', body)
+
+    def test_rejected_analyzer_original_receipt_reaches_publication(self):
+        report, ce, analyzer, calibration = analyzer_fixture()
+        report['repositories'][0]['project'] = 'test/apex'
+        report['findings'] = []
+        report['finding_dispositions'][0].update(action='rejected', reason='Source disproves the diagnostic')
+        report['finding_dispositions'][0].pop('finding_id')
+        calibration['groups'][0]['validation_status'] = 'rejected'
+        for name, value in [('report', report), ('ce', ce), ('analyzer', analyzer),
+                            ('calibration', calibration), ('manifest', manifest())]:
+            (self.root / f'{name}.json').write_text(json.dumps(value))
+        original = (self.root / 'analyzer.json').read_bytes()
+        args = ('publish', '--project', 'test/apex', '--mr', '7', '--report', str(self.root / 'report.json'),
+                '--ce-receipt', str(self.root / 'ce.json'), '--calibration-receipt', str(self.root / 'calibration.json'),
+                '--manifest-lock', str(self.root / 'manifest.json'), '--output', str(self.root / 'preview.md'), '--publish')
+        missing = self.run_cli(*args)
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertEqual(self.loaded()['calls'], [])
+        published = self.run_cli(*args, '--analyzer-receipt', str(self.root / 'analyzer.json'))
+        self.assertEqual(published.returncode, 0, published.stderr)
+        body = self.loaded()['notes'][0]['body']
+        self.assertIn('analyzer/A1 (rejected; source P3)', body)
+        self.assertIn('No findings supplied.', body)
+        self.assertEqual((self.root / 'analyzer.json').read_bytes(), original)
 
     def test_stale_or_closed_refuses_publication(self):
         pending_diff = self.mr()
