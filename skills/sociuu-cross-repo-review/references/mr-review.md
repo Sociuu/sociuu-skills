@@ -8,19 +8,19 @@ outside blind reviewer contexts.
 ## Explain the change
 
 Write the report JSON in [report-contract.md](report-contract.md). Bind it to
-the prepared manifest lock and account for every raw CE/contract finding,
+the prepared manifest lock and account for every raw CE/contract finding and inventory concern,
 including source-backed rejections. Never relabel an old review with new SHAs. Begin with
 the concrete problem, what changes and what a user/operator will experience.
 Use short sentences, define unfamiliar terms, and group the walkthrough by
 behavior rather than one sentence per file. Do not paste commit messages as
 the explanation. Retain exact source revisions and raw CE/contract receipts.
-New dossiers use version 2 and declare source-evidenced `contract_review`
+New dossiers use version 3 and declare source-evidenced `contract_review`
 applicability. A complete contract pass carries the boundary and credential
 inventories described in [integration-review.md](integration-review.md); the
-rendered dossier shows both. Historical version 1 reports can be previewed;
+rendered dossier shows both. Historical version 1 and 2 reports can be previewed;
 known material holds retain hold status, and otherwise the recommendation is
 incomplete. Explicit GitLab publication requires
-version 2.
+version 3.
 
 Each finding has severity, trigger, consequence, source evidence, suggested
 correction and validation status. Explain what to change and why, then how to
@@ -37,15 +37,19 @@ Use the contract pass's boundary inventory and credential policy matrix when
 applicable, including retained branches and unassessed destinations. Run
 [behavior-review.md](behavior-review.md)'s fresh rating-hidden independent
 calibration after CE/contract source validation and before the final dossier
-when retained candidates exist. Preserve the exact projected inputs, original
+for every raw CE/contract finding and inventory concern, including claims
+proposed for rejection. Audit inventory prose against linked concerns before
+projecting claims; missing source closure remains an explicit coverage limit. Preserve the exact projected inputs, original
 calibration JSON and worker/context provenance beside the raw receipts. Account
 for every input group through explicit dispositions and causal merges; explain
 supported impact, preconditions, recovery and any source-backed disagreement.
 Keep original CE/contract ratings visible when reclassified. Record the required
 `calibration` check with artifact evidence; an incomplete or failed worker keeps
-the dossier incomplete. With zero retained candidates, record the explicit skip
-reason. Verification gaps and unresolved consequences remain visible after
-reconciliation. Declaration checks cannot prove semantic honesty or independence;
+the dossier incomplete. Skip only with zero raw findings, inventoried concerns and final candidates,
+with the explicit source-evidenced reason in checks. Verification gaps and unresolved consequences remain visible after
+reconciliation. Supply the original calibration receipt to rendering/publication; declarations
+alone do not establish closure. Structural checks cannot prove that inventory
+prose has no undeclared concern, semantic honesty or independence;
 raw artifacts and provenance must remain inspectable.
 
 ## Checks and documentation
@@ -55,7 +59,7 @@ task checkout. The default plans without execution; `--run` explicitly permits
 execution of repository tooling/configuration. Do not execute archived packet
 code. No downloads, installs, automatic fixes or new dependency are implicit.
 Import analyzer diagnostics as candidates for source validation, not confirmed
-material findings. Keep command, exit, raw evidence and source provenance.
+material findings. Keep command, exit, raw evidence and source provenance. Preserve the imported candidates as a separate scoped analyzer receipt before calibration, using the source-claim fields in report-contract.md. Pass it via --analyzer-receipt alongside the original calibration JSON; rejected and merged diagnostics retain their original IDs and explicit stage:analyzer dispositions.
 
 Check the repository's actual tooling first. A PHPStan entry in a lockfile
 does not establish a configured PHPStan/Larastan check. Existing Pint `--test`,
@@ -103,11 +107,11 @@ the task's participating revisions and invoke this skill; one MR alone is not
 proof that no companion change exists.
 
 Render locally with `report.py --report REPORT.json --ce-receipt CE.json
---integration-receipt CONTRACT.json --manifest-lock MANIFEST_LOCK.json --output REVIEW.md`. The publication
+--integration-receipt CONTRACT.json --calibration-receipt CALIBRATION.json --manifest-lock MANIFEST_LOCK.json --output REVIEW.md`. The publication
 adapter defaults to preview, verifies every project's current head/base and
 refuses stale source or closed/merged targets. Explicit `--publish` writes
 one ordinary non-resolvable note on the authorized MR, preserving its human
-description. Pass the same `--manifest-lock` to `gitlab.py publish`; list every additional
+description. Pass the same `--manifest-lock` and, when calibration ran, `--calibration-receipt` to `gitlab.py publish`; list every additional
 changed MR using repeated `--companion NAMESPACE/PROJECT!IID`. It only updates
 its own note with the exact managed header and reads back the result.
 It creates no pipeline, commit status or blocking discussion. Keep complete
